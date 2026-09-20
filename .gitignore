@@ -1,0 +1,14 @@
+# Data: never commit athlete or third-party data
+data/raw/
+data/private/
+*.xlsx
+*.npz
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+# Outputs that may embed real data
+outputs_private/
+desktop.ini
