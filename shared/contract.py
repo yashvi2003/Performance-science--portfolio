@@ -13,6 +13,8 @@ from typing import Any, Sequence
 
 import pandas as pd
 
+STANDARD_G: float = 9.80665
+
 
 class TestType(str, Enum):
     __test__ = False

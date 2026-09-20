@@ -1,0 +1,51 @@
+# Configuration for Project 1: Automatic Jump Analysis Engine (p1_nmt_pipeline)
+# Governed by specs/01_neuromuscular_pipeline.md and PLAN.md.
+
+filters:
+  # 4th-order zero-phase lowpass Butterworth filter (scipy.signal.filtfilt)
+  order: 4
+  cutoffs_hz:
+    # 30 Hz standard cutoff for CMJ: eliminates high-frequency noise while preserving impulse dynamics
+    CMJ: 30.0
+    # 30 Hz for Squat Jump: matches concentric profile of CMJ
+    SJ: 30.0
+    # 50 Hz for Drop Jump: higher cutoff to accurately resolve rapid ground-contact impact transient (<250ms GCT)
+    DJ: 50.0
+    # 20 Hz for IMTP: low-pass cutoff tailored for isometric force plate tests to suppress electrical mains noise
+    IMTP: 20.0
+    # Default fallback cutoff
+    default: 30.0
+
+thresholds:
+  # Pre-movement baseline quiet standing duration (s)
+  quiet_window_s: 0.5
+  # Initial transient skip duration before computing baseline (s)
+  quiet_start_s: 0.05
+  # SD multiplier for movement onset detection (|F - BW| > k * SD) following Chavda et al. (2018)
+  onset_sd_multiplier: 5.0
+  # Pre-onset lead offset for trapezoidal integration start (s) to capture subtle pre-threshold unweighting
+  integration_lead_s: 0.030
+  # Force threshold below which takeoff is registered (N)
+  takeoff_threshold_n: 10.0
+  # Force threshold above which landing impact is registered (N)
+  landing_threshold_n: 10.0
+  # Minimum consecutive samples below threshold to confirm flight (eliminates single-point noise spikes)
+  takeoff_min_samples: 5
+  # Flight phase force offset correction: optional flag, off by default per research conventions
+  correct_flight_phase_offset: false
+  # Countermovement invalidation threshold for SJ (% of body weight dipping below baseline)
+  sj_countermovement_threshold_pct: 5.0
+  # Pre-tension threshold for IMTP (N above baseline prior to command)
+  imtp_pretension_threshold_n: 50.0
+
+classifier:
+  # Minimum confidence score to output a definitive label (otherwise returns 'unknown')
+  confidence_threshold: 0.70
+  # Relative countermovement dip (% of BW) required to classify as CMJ
+  cmj_min_dip_pct: 10.0
+  # Maximum allowable dip (% of BW) to classify as SJ
+  sj_max_dip_pct: 5.0
+  # Minimum flight duration (s) to classify as airborne jump
+  flight_min_duration_s: 0.15
+  # Minimum sustained force (% of BW) to classify as isometric pull
+  imtp_min_plateau_pct: 150.0
