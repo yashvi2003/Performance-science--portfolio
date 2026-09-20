@@ -93,9 +93,17 @@ def make_cmj_trial(
     asymmetry_index: float = 0.0,
     noise_sd_n: float = 0.0,
     flight_force_offset_n: float = 0.0,
+    offset_whole_trace: bool = False,
     random_seed: int | None = 42,
+    t_onset: float | None = None,
+    seed: int | None = None,
 ) -> ForceTrialData:
     """Generate a physically consistent Countermovement Jump (CMJ) force-time trial."""
+    if seed is not None:
+        random_seed = seed
+    if t_onset is not None:
+        t_quiet_s = t_onset
+
     rng = np.random.default_rng(random_seed)
     bw_n = body_mass_kg * STANDARD_G
 
@@ -116,7 +124,8 @@ def make_cmj_trial(
 
     A_unw = 4.0
     A_brake = A_unw * (t_unweight_s / t_braking_s)
-    A_prop = (v_takeoff_analytical * np.pi) / (2.0 * t_propulsion_s)
+    # A_prop with terminal -g offset ensures F(t_takeoff) = 0 N continuously
+    A_prop = (v_takeoff_analytical * np.pi) / (2.0 * t_propulsion_s) + STANDARD_G
 
     acc = np.zeros(n_pts)
     for i, t in enumerate(time_s):
@@ -130,19 +139,23 @@ def make_cmj_trial(
             acc[i] = A_brake * np.sin(np.pi * tau)
         elif t < t_takeoff:
             tau = (t - t_braking_end) / t_propulsion_s
-            acc[i] = A_prop * np.sin(np.pi * tau)
+            acc[i] = A_prop * np.sin(np.pi * tau) - STANDARD_G * np.sin(0.5 * np.pi * tau)
         elif t < t_landing:
             acc[i] = -STANDARD_G
         else:
             tau_land = t - t_landing
-            if tau_land < 0.15:
-                acc[i] = 25.0 * np.sin(np.pi * tau_land / 0.15) * np.exp(-15.0 * tau_land)
+            if tau_land < 0.25:
+                # Impact acceleration starting from -g (0 N ground force) up to high deceleration peak
+                acc[i] = -STANDARD_G + (30.0 + STANDARD_G) * np.sin(np.pi * tau_land / 0.25)
             else:
                 acc[i] = 0.0
 
     force_n = body_mass_kg * (acc + STANDARD_G)
     flight_mask = (time_s >= t_takeoff) & (time_s < t_landing)
-    force_n[flight_mask] = flight_force_offset_n
+    if offset_whole_trace:
+        force_n += flight_force_offset_n
+    else:
+        force_n[flight_mask] = flight_force_offset_n
 
     f_total, f_left, f_right = _apply_asymmetry_and_noise(force_n, asymmetry_index, noise_sd_n, rng)
 

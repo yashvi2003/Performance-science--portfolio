@@ -75,3 +75,7 @@ def butterworth_lowpass_filter(
 
     filtered = signal.sosfiltfilt(sos, data, padlen=padlen)
     return filtered
+
+
+# Explicit alias matching spec terminology
+zero_phase_butterworth_filter = butterworth_lowpass_filter

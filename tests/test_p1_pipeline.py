@@ -102,12 +102,32 @@ def test_validator_detects_non_monotonic_time():
         load_and_validate_trial(df)
 
 
-def test_validator_flags_irregular_dt_and_negative_force():
-    """Verify irregular sampling intervals and negative force values are flagged in QA."""
+def test_validator_resamples_irregular_dt_and_flags_negative_force():
+    """Verify irregular sampling intervals are resampled onto a uniform grid with a QA warning."""
     t = [0.0, 0.001, 0.002, 0.0035, 0.0045, 0.0055]  # gap at index 3
     f = [700.0, 700.0, 700.0, -15.0, 700.0, 700.0]   # negative force at index 3
     df = pd.DataFrame({"time": t, "force": f})
 
-    validated = load_and_validate_trial(df, body_mass_kg=70.0)
-    assert any("irregular_dt" in flag for flag in validated.qa_flags)
+    validated = load_and_validate_trial(df, body_mass_kg=70.0, quiet_window_s=0.005)
+    assert any("resampled_irregular_dt" in flag for flag in validated.qa_flags)
     assert any("negative_force" in flag for flag in validated.qa_flags)
+    # Check that resampled time array has strictly uniform step
+    diffs = np.diff(validated.time_s)
+    assert np.allclose(diffs, diffs[0], atol=1e-8)
+
+
+def test_validator_quiet_window_qa_flags():
+    """Verify quiet window QA flags noisy SD (>15 N) and drifting trend (>20 N/s)."""
+    t = np.linspace(0.0, 0.6, 601)
+    # Drifting trend: 700 N + 30 N/s * t
+    f_drifting = 700.0 + 30.0 * t
+    df_drifting = pd.DataFrame({"time": t, "force": f_drifting})
+    val_drift = load_and_validate_trial(df_drifting, body_mass_kg=70.0)
+    assert any("quiet_window_drifting_trend" in flag for flag in val_drift.qa_flags)
+
+    # High noise: SD ~ 20 N
+    np.random.seed(42)
+    f_noisy = 700.0 + np.random.normal(0, 20.0, len(t))
+    df_noisy = pd.DataFrame({"time": t, "force": f_noisy})
+    val_noisy = load_and_validate_trial(df_noisy, body_mass_kg=70.0)
+    assert any("quiet_window_noisy_sd" in flag for flag in val_noisy.qa_flags)

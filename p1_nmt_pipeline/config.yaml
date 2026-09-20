@@ -29,10 +29,19 @@ thresholds:
   takeoff_threshold_n: 10.0
   # Force threshold above which landing impact is registered (N)
   landing_threshold_n: 10.0
-  # Minimum consecutive samples below threshold to confirm flight (eliminates single-point noise spikes)
+  # Consecutive duration (ms) below threshold to confirm flight/takeoff (scaled dynamically by sampling rate: N = max(1, round(fs * ms / 1000)))
+  takeoff_consecutive_ms: 2.5
+  # Consecutive duration (ms) above threshold to confirm landing contact
+  landing_consecutive_ms: 2.5
+  # Minimum consecutive samples fallback if ms is not specified
   takeoff_min_samples: 5
   # Flight phase force offset correction: optional flag, off by default per research conventions
   correct_flight_phase_offset: false
+  # Flight offset correction model: 'whole_trace' (instrumentation/tare shift, recomputes BW and mass) vs 'flight_only' (flight threshold adjustment)
+  flight_offset_model: "whole_trace"
+  # Quiet window QA thresholds
+  max_quiet_sd_n: 15.0
+  max_quiet_trend_n_per_s: 20.0
   # Countermovement invalidation threshold for SJ (% of body weight dipping below baseline)
   sj_countermovement_threshold_pct: 5.0
   # Pre-tension threshold for IMTP (N above baseline prior to command)

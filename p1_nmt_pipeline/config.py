@@ -33,8 +33,13 @@ class ThresholdConfig:
     integration_lead_s: float = 0.030
     takeoff_threshold_n: float = 10.0
     landing_threshold_n: float = 10.0
+    takeoff_consecutive_ms: float = 2.5
+    landing_consecutive_ms: float = 2.5
     takeoff_min_samples: int = 5
     correct_flight_phase_offset: bool = False
+    flight_offset_model: str = "whole_trace"  # 'whole_trace' or 'flight_only'
+    max_quiet_sd_n: float = 15.0
+    max_quiet_trend_n_per_s: float = 20.0
     sj_countermovement_threshold_pct: float = 5.0
     imtp_pretension_threshold_n: float = 50.0
 
@@ -93,8 +98,13 @@ class PipelineConfig:
             integration_lead_s=thresholds_data.get("integration_lead_s", 0.030),
             takeoff_threshold_n=thresholds_data.get("takeoff_threshold_n", 10.0),
             landing_threshold_n=thresholds_data.get("landing_threshold_n", 10.0),
+            takeoff_consecutive_ms=thresholds_data.get("takeoff_consecutive_ms", 2.5),
+            landing_consecutive_ms=thresholds_data.get("landing_consecutive_ms", 2.5),
             takeoff_min_samples=thresholds_data.get("takeoff_min_samples", 5),
             correct_flight_phase_offset=thresholds_data.get("correct_flight_phase_offset", False),
+            flight_offset_model=thresholds_data.get("flight_offset_model", "whole_trace"),
+            max_quiet_sd_n=thresholds_data.get("max_quiet_sd_n", 15.0),
+            max_quiet_trend_n_per_s=thresholds_data.get("max_quiet_trend_n_per_s", 20.0),
             sj_countermovement_threshold_pct=thresholds_data.get("sj_countermovement_threshold_pct", 5.0),
             imtp_pretension_threshold_n=thresholds_data.get("imtp_pretension_threshold_n", 50.0),
         )
