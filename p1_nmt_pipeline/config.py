@@ -42,6 +42,13 @@ class ThresholdConfig:
     max_quiet_trend_n_per_s: float = 20.0
     sj_countermovement_threshold_pct: float = 5.0
     imtp_pretension_threshold_n: float = 50.0
+    landing_noise_k: float = 3.0
+    """Multiplier for flight-phase noise SD added to landing threshold.
+
+    Robust landing threshold = max(landing_threshold_n, flight_floor + k * flight_sd).
+    Prevents false-early landing triggers when the flight-phase signal is noisy.
+    Default k = 3.0 (three sigma above flight floor noise).
+    """
 
 
 @dataclass(frozen=True)
@@ -107,6 +114,7 @@ class PipelineConfig:
             max_quiet_trend_n_per_s=thresholds_data.get("max_quiet_trend_n_per_s", 20.0),
             sj_countermovement_threshold_pct=thresholds_data.get("sj_countermovement_threshold_pct", 5.0),
             imtp_pretension_threshold_n=thresholds_data.get("imtp_pretension_threshold_n", 50.0),
+            landing_noise_k=thresholds_data.get("landing_noise_k", 3.0),
         )
 
         classifier = ClassifierConfig(

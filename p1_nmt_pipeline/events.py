@@ -379,6 +379,32 @@ def detect_cmj_events(
                 land_thresh,
             )
 
+    # Item B: Robust landing threshold based on flight-phase noise level.
+    # If flight-phase samples are noisy, a fixed landing_threshold_n may
+    # trigger prematurely. We compute the flight-floor noise SD and raise
+    # the threshold to: max(landing_threshold_n, flight_floor_mean + k * flight_floor_sd)
+    # where k = thresh.landing_noise_k (default 3.0).
+    if prelim_to_idx is not None:
+        # Collect mid-flight samples (trimmed to avoid takeoff/landing transients)
+        if prelim_land_idx is not None and (prelim_land_idx - prelim_to_idx) > 10:
+            _flight_trim = max(2, int((prelim_land_idx - prelim_to_idx) * 0.15))
+            _fc = prelim_to_idx + _flight_trim
+            _fe = prelim_land_idx - _flight_trim
+        else:
+            _fc = prelim_to_idx + 1
+            _fe = min(prelim_to_idx + max(5, int(fs_hz * 0.08)), n_samples)
+
+        _flight_sig = init_detect_force[_fc : _fe]
+        if len(_flight_sig) >= 4:
+            _flight_mean = float(np.mean(_flight_sig))
+            _flight_sd = float(np.std(_flight_sig))
+            _robust_land = _flight_mean + thresh.landing_noise_k * _flight_sd
+            land_thresh = max(land_thresh, _robust_land)
+            logger.debug(
+                "Robust landing threshold: floor_mean=%.2f N, floor_sd=%.2f N, k=%.1f, robust=%.2f N",
+                _flight_mean, _flight_sd, thresh.landing_noise_k, _robust_land,
+            )
+
     # 4. Movement Onset Detection
     # Threshold: F_thresh_onset = BW - k * s_BW
     onset_delta = thresh.onset_sd_multiplier * max(quiet_sd, 1.0)

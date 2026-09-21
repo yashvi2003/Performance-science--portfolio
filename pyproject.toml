@@ -33,6 +33,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 addopts = "-v --strict-markers"
+markers = [
+    "slow: marks tests as slow-running (deselect with '-m not slow')",
+]
 
 [tool.ruff]
 line-length = 100
