@@ -141,31 +141,31 @@ def _build_cmj_acceleration(
         elif t < t_unweight_end:
             tau = (t - t_onset) / t_unweight_s
             if template == "deep_unweight":
-                # Deeper dip: amplitude 1.6x, same closed-form impulse
+                # Deeper dip: amplitude 1.6x
                 acc[i] = -1.6 * A_unw * np.sin(np.pi * tau)
             else:
                 acc[i] = -A_unw * np.sin(np.pi * tau)
         elif t < t_braking_end:
             tau = (t - t_unweight_end) / t_braking_s
-            if template in ("high_braking",):
-                # Braking force well above BW at v=0 transition
-                # Double the amplitude but half the time for the first half, normal second half
-                if tau < 0.5:
-                    acc[i] = 1.8 * A_brake * np.sin(np.pi * tau * 2.0)
-                else:
-                    acc[i] = A_brake * np.sin(np.pi * tau)
+            if template == "deep_unweight":
+                # Match unweighting impulse (1.6x) so velocity reaches 0 at t_braking_end
+                acc[i] = 1.6 * A_brake * np.sin(np.pi * tau)
+            elif template == "high_braking":
+                # High early eccentric braking peak with zero-integral harmonic skew:
+                # int_0^1 [sin(pi*tau) + 0.4*sin(2*pi*tau)] dtau = 2/pi (exact momentum conservation)
+                acc[i] = A_brake * (np.sin(np.pi * tau) + 0.4 * np.sin(2.0 * np.pi * tau))
             else:
                 acc[i] = A_brake * np.sin(np.pi * tau)
         elif t < t_takeoff:
             tau = (t - t_braking_end) / t_propulsion_s
             base_acc = A_prop * np.sin(np.pi * tau) - STANDARD_G * np.sin(0.5 * np.pi * tau)
             if template == "double_peak":
-                # Add secondary propulsion micro-peak (plateau then second push)
-                # Small extra sine burst in the second half of propulsion, scaled to keep impulse identical
-                if tau > 0.5:
-                    tau2 = (tau - 0.5) / 0.5
+                # Add secondary propulsion micro-peak in the middle of propulsion
+                # (isolated from takeoff crossing so integration cutoff is identical)
+                if 0.3 < tau < 0.7:
+                    tau2 = (tau - 0.3) / 0.4
                     # Perturbation integrates to 0 (positive + negative equal area)
-                    acc[i] = base_acc + 0.15 * A_prop * np.sin(2.0 * np.pi * tau2)
+                    acc[i] = base_acc + 0.20 * A_prop * np.sin(2.0 * np.pi * tau2)
                 else:
                     acc[i] = base_acc
             else:

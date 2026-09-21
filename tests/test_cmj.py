@@ -1,4 +1,4 @@
-﻿"""Unit and validation tests for CMJ phase detection and metrics computation.
+"""Unit and validation tests for CMJ phase detection and metrics computation.
 
 Governed by specs/01_neuromuscular_pipeline.md, PLAN.md, and McMahon et al. (2018).
 Evaluates ground truth recovery against independent analytical solutions:
@@ -549,7 +549,7 @@ def test_monte_carlo_cmj_accuracy():
 
     All 95th-percentile errors must stay within the documented tolerances.
     Trials vary: seed, jump height (0.25â€“0.55 m), body mass (60â€“100 kg),
-    quiet time (0.4â€“0.7 s), event times (small uniform jitter).
+    quiet time (0.6â€“0.9 s), event times (jittered), and smooth onset.
 
     SYNTHETIC DATA ONLY.
     """
@@ -557,13 +557,16 @@ def test_monte_carlo_cmj_accuracy():
     rng_mc = np.random.default_rng(999)
 
     mc_conditions = [
-        ("Clean 2000 Hz",        2000.0,  0.0,  "single_peak"),
-        ("Noise 3N  2000 Hz",    2000.0,  3.0,  "single_peak"),
-        ("Noise 12N 2000 Hz",    2000.0, 12.0,  "single_peak"),
-        ("Clean 250 Hz",          250.0,  0.0,  "single_peak"),
-        ("Template: double_peak", 2000.0,  0.0,  "double_peak"),
-        ("Template: deep_unweight", 2000.0, 0.0, "deep_unweight"),
-        ("Template: high_braking", 2000.0, 0.0, "high_braking"),
+        # name, fs, noise_sd, flight_noise_sd, flight_offset, template, correct_offset
+        ("Clean 2000 Hz",        2000.0,  0.0,  0.0, 0.0, "single_peak",   False),
+        ("Noise 3N  2000 Hz",    2000.0,  3.0,  0.0, 0.0, "single_peak",   False),
+        ("Noise 12N 2000 Hz",    2000.0, 12.0,  0.0, 0.0, "single_peak",   False),
+        ("Clean 250 Hz",          250.0,  0.0,  0.0, 0.0, "single_peak",   False),
+        ("Template: double_peak", 2000.0,  0.0,  0.0, 0.0, "double_peak",   False),
+        ("Template: deep_unw",    2000.0,  0.0,  0.0, 0.0, "deep_unweight", False),
+        ("Template: high_brake",  2000.0,  0.0,  0.0, 0.0, "high_braking",  False),
+        ("Flight Offset +5N",     2000.0,  0.0,  0.0, 5.0, "single_peak",   True),
+        ("Flight Noise 4N",       2000.0,  0.0,  4.0, 0.0, "single_peak",   False),
     ]
 
     # Documented 95th-percentile tolerance caps (mm / ms)
@@ -592,13 +595,22 @@ def test_monte_carlo_cmj_accuracy():
     print(sub)
     print("-" * 120)
 
-    for (cond_name, fs, noise, template) in mc_conditions:
+    for (cond_name, fs, noise, flight_noise, flight_offset, template, do_corr) in mc_conditions:
         h_errs, hf_errs, onset_errs, to_errs, land_errs = [], [], [], [], []
+
+        cfg = PipelineConfig(
+            filters=base_cfg.filters,
+            thresholds=ThresholdConfig(
+                correct_flight_phase_offset=do_corr,
+                flight_offset_model="whole_trace" if do_corr else base_cfg.thresholds.flight_offset_model,
+            ),
+            classifier=base_cfg.classifier,
+        )
 
         for _ in range(N_TRIALS):
             target_h = float(rng_mc.uniform(0.25, 0.55))
             mass = float(rng_mc.uniform(60.0, 100.0))
-            t_quiet = float(rng_mc.uniform(0.4, 0.7))
+            t_quiet = float(rng_mc.uniform(0.6, 0.9))
             seed_i = int(rng_mc.integers(0, 2**31))
 
             trial = make_cmj_trial(
@@ -607,12 +619,17 @@ def test_monte_carlo_cmj_accuracy():
                 body_mass_kg=mass,
                 t_quiet_s=t_quiet,
                 noise_sd_n=noise,
+                noise_flight_sd_n=flight_noise,
+                flight_force_offset_n=flight_offset,
+                offset_whole_trace=do_corr,
                 seed=seed_i,
                 template=template,
+                jitter_s=0.015,     # Add event time jitter (Item C)
+                onset_ramp_s=0.02,  # Add gradual onset (Item C)
             )
 
             try:
-                _, events, metrics = _run_cmj_pipeline(trial, config=base_cfg)
+                _, events, metrics = _run_cmj_pipeline(trial, config=cfg)
                 h_errs.append((metrics.jump_height_impulse_m - target_h) * 1000.0)
                 if metrics.jump_height_flight_m is not None:
                     hf_errs.append((metrics.jump_height_flight_m - target_h) * 1000.0)
@@ -699,4 +716,23 @@ def test_tolerance_audit():
     # The correct assertion is: landing peak > BW, which is checked in
     # test_pre_takeoff_peaks_isolated_from_landing.
     assert True  # tolerance audit complete â€” no tolerance loosened
+
+def test_post_landing_velocity_returns_to_zero():
+    """Verify that post-landing velocity returns to ~0 (momentum conservation)."""
+    # Item 7: Add a test that post-landing velocity returns to ~0.
+    trial = make_cmj_trial(fs_hz=2000.0, target_jump_height_m=0.40, template="single_peak", seed=42)
+    dt = 1.0 / trial.fs_hz
+    
+    # a(t) = (F(t) - BW)/m
+    a_net = (trial.force_n - trial.body_weight_n) / trial.body_mass_kg
+    
+    # Cumulative integration
+    v = np.cumsum(a_net) * dt
+    
+    # Velocity well after landing (at the end of the trial)
+    v_end = v[-1]
+    
+    # The jump impulse is generated from rest and dissipates fully by the end
+    # so final velocity must be very close to 0 m/s.
+    assert abs(v_end) < 1e-3, f"Final velocity did not return to 0, v_end={v_end:.6f} m/s"
 
