@@ -22,13 +22,13 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 - [x] M2e Real-data method comparison on the 10 trials: flight-time vs impulse-momentum height (bias, limits of agreement, Bland-Altman with CIs; n = 10 stated)
 - [x] M2f Analyst-choice sensitivity: effect of baseline window, onset SD multiplier, take-off/landing thresholds and filter cutoff on height, RSImod, peak power
 - [x] M2g Open-data validation on White et al. (Zenodo 10.5281/zenodo.19136480, CC BY 4.0; 67 participants, 663 CMJ trials, repeated per participant): adapter for the .npz (reconciled subject_ids 0..68 minus {14, 29}, n_subjects=69 metadata note; pre_takeoff_window mode at 1000 Hz), agreement of impulse-momentum height and peak power with dataset reference values, within-participant reliability (CV, ICC, SEM, MDC). Limits documented: 1000 Hz vGRF, pre-take-off window only, CMJ only
-- [ ] M3 Jump-type classifier (rule-based, transparent features): CMJ / SJ / DJ / isometric pull / unknown, with a reason string and confidence; all 10 real trials must come out CMJ; other classes validated on synthetic data only and labelled so
-- [ ] M4a Squat jump metrics + countermovement invalid-trial flag + tests
-- [ ] M4b Drop jump metrics (GCT, flight time, height, RSI) + tests
-- [ ] M5a Single-trial report: VALD-style figure (force-time curve with phases shaded and events marked, velocity/power panels) + key-metrics table, exported as PNG and HTML/PDF
-- [ ] M5b Minimal Streamlit app: drop a file, see detected jump type, metrics and graphs
+- [ ] M5a Single-trial report: VALD-style figure (force-time curve with phases shaded and events marked, velocity/power panels) + key-metrics table, exported as PNG
 - [ ] M6a CLI that writes sessions.csv per the shared contract
-- [ ] M6b README (question, analysis plan, install/run, assumptions, limitations, synthetic disclaimer, "how AI was used and verified")
+- [ ] M6b README polish (question, analysis plan, install/run, assumptions, limitations, synthetic disclaimer, "how AI was used and verified")
+- [ ] M3 [Deferred / Future Work] Jump-type classifier (rule-based, transparent features): CMJ / SJ / DJ / isometric pull / unknown (Note: Architecture in events.py/metrics.py is designed to generalize, but classifier and other jump modalities were deferred to prioritize wearable analytics under deadline)
+- [ ] M4a [Deferred / Future Work] Squat jump metrics + countermovement invalid-trial flag + tests
+- [ ] M4b [Deferred / Future Work] Drop jump metrics (GCT, flight time, height, RSI) + tests
+- [ ] M5b [Deferred / Future Work] Minimal Streamlit app: drop a file, see detected jump type, metrics and graphs
 
 ## Project 2 - Baselines, readiness, SQL and longitudinal reporting (p2_nmt_reports)
 - [ ] M1a Loaders (via shared contract) + rolling personal baselines

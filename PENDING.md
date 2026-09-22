@@ -20,3 +20,14 @@
    - Status: Complete. `test_cmj_short_quiet_lead_ins` rerun with noise (3 N SD), event jitter (15 ms), and gradual onset (20 ms ramp) across lead-ins 0.30--0.45 s.
    - Mechanism documented in `p1_nmt_pipeline/README.md`: Gradual onset delays threshold crossing by ~11 ms. This shortens detected contraction time by ~11 ms (~1.5%), artificially inflating RSImod by +0.012 (+2.4%). All short lead-ins (<0.50 s) reliably trigger QA warning flags (`quiet_window_under_0.5s` and `quiet_window_short_{duration}s`).
 
+## Deferred Scope & Future Work (P1 Jump Classifier & Modalities)
+
+- **M3 (Jump-Type Classifier: CMJ / SJ / DJ / IMTP / Unknown)**:
+  - *Status*: Deferred / Future Work.
+  - *Architectural Note*: The pipeline architecture (`events.py` and `metrics.py` module boundaries) is explicitly designed to generalize across jump modalities, but full classifier implementation and dedicated test-type engines were deprioritized to focus on wearable data analytics and longitudinal modeling under time constraints.
+- **M4a (Squat Jump [SJ] Engine & Metrics)**:
+  - *Status*: Deferred / Future Work.
+- **M4b (Drop Jump [DJ] Engine & Reactive Strength Index)**:
+  - *Status*: Deferred / Future Work.
+- **M5b (Streamlit Dashboard App)**:
+  - *Status*: Deferred / Future Work.
