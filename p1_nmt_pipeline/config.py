@@ -45,6 +45,8 @@ class ThresholdConfig:
     landing_noise_k: float = 3.0
     subsample_takeoff: bool = False
     """Whether to extrapolate takeoff velocity and time to flight floor."""
+    min_flight_duration_s: float = 0.200
+    """Minimum refractory flight duration (s) before landing search to avoid post-takeoff vibration/ringing."""
 
 
 @dataclass(frozen=True)

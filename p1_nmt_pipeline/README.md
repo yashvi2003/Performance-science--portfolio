@@ -52,8 +52,88 @@ An onset delay shortens detected contraction time, which artificially inflates R
 
 ---
 
+## Real-Data Validation (M2c–M2f: Professor-Supplied Cohort)
+
+### Scientific Scope & Framing
+This analysis evaluates 10 real athletic CMJ trials ($2000\text{ Hz}$ vertical force plate recordings, anonymized ordinals `T01`–`T10`) supplied by the user's professor.
+- **Between-Athlete Scope**: Each athlete performed **ONE trial**. There are no repeated trials or longitudinal screenings in this dataset. Consequently, trial-to-trial reliability ($\text{CV}$, $\text{ICC}$, $\text{SEM}$, $\text{MDC}$) and within-athlete change **cannot** be inferred from this dataset. Those analyses are reserved for open repeated-trial datasets (White et al., Zenodo, M2g).
+- **Public Guardrails**: Public figures and tables use anonymous ordinal labels `T01`–`T10`. Internal IDs and raw files are gitignored and never published.
+
+---
+
+### Milestone M2c: Data Quality & Signal Integrity Report
+A comprehensive signal integrity audit was executed across all 10 real trials:
+1. **Plausibility of Body Mass**: All 10 athletes exhibit plausible body masses ($60.7\text{--}104.6\text{ kg}$, mean $73.7\text{ kg}$).
+2. **Timestamp Regularity**: 5 of 10 trials contain small timestamp irregularities ($28\text{--}30$ irregular sample intervals, $\sim 0.4\%$ of samples). The pipeline automatically resamples these trials onto a uniform $2000\text{ Hz}$ grid using linear interpolation.
+3. **Negative Force Excursions & Plate Ringing**: All 10 trials exhibit negative force readings (minimum $-4.1\text{ N}$ to $-59.3\text{ N}$). These negative excursions occur strictly during the early airborne phase ($t = 1.50\text{--}1.57\text{ s}$) due to **mechanical plate oscillation / resonance** immediately following explosive takeoff. Setting the configurable refractory flight lockout (`min_flight_duration_s: 0.200`) completely prevents false landing triggers during post-takeoff vibration.
+4. **Flight Phase Baseline Offset**: The true mid-flight force floor across all 10 trials is $+2.95\text{ N}$ to $+5.43\text{ N}$ (noise $\text{SD} \approx 2.8\text{ N}$).
+5. **Quiet Standing Stability**: Initial standing segments showed varying noise ($\text{SD} = 1.17\text{--}3.75\text{ N}$, one trial $12.67\text{ N}$). Adaptive window detection reliably extracted quiet baselines ($0.15\text{--}0.45\text{ s}$) before unweighting onset.
+6. **Detection Success**: Takeoff and landing detection succeeded in **10 out of 10 trials** ($0\text{ failures}$).
+
+*Figure Reference*: [`reports/figures/cmj_data_quality_summary.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_data_quality_summary.png)
+
+---
+
+### Milestone M2d: Golden Test Against Reference Workbook
+The pipeline was evaluated against the reference trial in `CMJ_Force_Time_Analysis.xlsx` (based on Chavda et al., 2018). Reference values are unverified cached Excel outputs, investigated in both directions:
+
+| Metric | Python Pipeline | Reference Workbook | Difference | Error (%) | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Body weight** | $605.96\text{ N}$ | $605.96\text{ N}$ | $-0.0006\text{ N}$ | $-0.00\%$ | **PASS** |
+| **Body mass** | $61.79\text{ kg}$ | $61.77\text{ kg}$ | $+0.02\text{ kg}$ | $+0.03\%$ | **PASS** |
+| **$h_{\text{imp}}$ (velocity)** | $0.2285\text{ m}$ | $0.2278\text{ m}$ | $+0.0008\text{ m}$ | $+0.33\%$ | **PASS** |
+| **$h_{\text{flt}}$ (flight time)** | $0.2538\text{ m}$ | $0.2540\text{ m}$ | $-0.0002\text{ m}$ | $-0.07\%$ | **PASS** |
+| **Flight time** | $0.4550\text{ s}$ | $0.4551\text{ s}$ | $-0.0001\text{ s}$ | $-0.02\%$ | **PASS** |
+| **Contraction time** | $0.8655\text{ s}$ | $0.8795\text{ s}$ | $-0.0140\text{ s}$ | $-1.59\%$ | **UNDERSTOOD** |
+| **Peak propulsion force** | $1176.0\text{ N}$ | $1185.3\text{ N}$ | $-9.27\text{ N}$ | $-0.78\%$ | **UNDERSTOOD** |
+| **Peak landing force** | $2894.9\text{ N}$ | $2895.6\text{ N}$ | $-0.71\text{ N}$ | $-0.02\%$ | **PASS** |
+| **Peak power** | $2343.7\text{ W}$ | $2351.3\text{ W}$ | $-7.58\text{ W}$ | $-0.32\%$ | **PASS** |
+| **$\text{RSImod}$** | $0.2640\text{ m/s}$ | $0.2590\text{ m/s}$ | $+0.0050\text{ m/s}$ | $+1.95\%$ | **PASS** |
+
+**Investigated Divergences:**
+1. **Contraction Time ($-14\text{ ms}$)**: The reference CSV contains $107$ irregular timestamp intervals ($1.8\%$ of rows). The reference Excel workbook indexed raw rows directly without resampling. Our validator resamples onto a uniform $2000\text{ Hz}$ time grid, shifting the effective time axis by $\sim 14\text{ ms}$ ($28\text{ samples}$), which accounts for the onset time discrepancy.
+2. **Peak Propulsion Force ($-9.3\text{ N}$)**: The reference uses the unfiltered raw signal (verified raw peak = $1185.2\text{ N}$). Our pipeline computes propulsion dynamics from the $30\text{ Hz}$ zero-phase Butterworth filtered signal for consistency with impulse and velocity integration. The $30\text{ Hz}$ filter slightly rounds the propulsion peak by $0.78\%$.
+3. **Peak Landing Force ($-0.71\text{ N}$)**: Peak landing force uses the raw signal because the sharp impact transient is severely attenuated by low-pass filtering. With raw force, landing peak matches the reference to within $0.02\%$.
+
+*Figure Reference*: [`reports/figures/cmj_golden_test_comparison.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_golden_test_comparison.png)
+
+---
+
+### Milestone M2e: Method Comparison (Flight-Time vs. Impulse-Momentum)
+A Bland-Altman method comparison was conducted between the impulse-momentum theorem ($h_{\text{imp}}$) and flight-time equation ($h_{\text{flt}} = \frac{1}{8} g t_{\text{flight}}^2$) across all 10 athletes:
+
+- **Between-Athlete Comparison**: $n = 10$, one trial per athlete.
+- **Mean Bias ($h_{\text{imp}} - h_{\text{flt}}$)**: **$-0.0098\text{ m}$ ($-9.8\text{ mm}$)** ($95\%\text{ CI}$: $-0.0208$ to $+0.0012\text{ m}$). Impulse-momentum estimates jump height $\sim 1\text{ cm}$ lower than flight time on average. This is standard in vertical jumping because athletes frequently land with slightly more ankle plantarflexion or knee flexion than at takeoff, slightly extending airborne flight duration relative to center-of-mass apex trajectory.
+- **Standard Deviation of Differences**: $0.0153\text{ m}$ ($1.53\text{ cm}$).
+- **95% Limits of Agreement**: **$-0.0399\text{ m}$ to $+0.0203\text{ m}$** ($-4.0\text{ cm}$ to $+2.0\text{ cm}$).
+- **Individual Pairings**: In 9 out of 10 trials, the methods agree within $0.3\text{--}2.2\text{ cm}$.
+- **Caution on Sample Size**: With $n = 10$, confidence intervals around the limits of agreement are wide (lower LoA CI: $-5.9$ to $-2.1\text{ cm}$; upper LoA CI: $+0.1$ to $+3.9\text{ cm}$) and represent indicative between-subject agreement, not within-subject reliability.
+
+*Figure Reference*: [`reports/figures/cmj_bland_altman.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_bland_altman.png)
+
+---
+
+### Milestone M2f: Analyst-Choice Sensitivity Analysis
+We systematically evaluated the stability of $h_{\text{imp}}$, $\text{RSImod}$, and peak mechanical power across six operational parameter sweeps:
+1. **Onset SD Multiplier ($k = 3.0, 5.0, 8.0$)**: Jump height moved by $<1.0\text{ mm}$ across all 10 trials. RSImod shifted by $<0.008\text{ m/s}$.
+2. **Quiet Window Duration ($0.30, 0.50, 0.70\text{ s}$)**: Jump height moved by $<1.5\text{ mm}$.
+3. **Takeoff Force Threshold ($5.0, 10.0, 20.0\text{ N}$)**: Jump height moved by $<2.8\text{ mm}$.
+4. **Landing Force Threshold ($5.0, 10.0, 20.0\text{ N}$)**: Because landing threshold only affects $h_{\text{flt}}$ and landing impact timing, $h_{\text{imp}}$, $\text{RSImod}$, and propulsion peak power were completely invariant ($\Delta = 0.0000$).
+5. **Filter Cutoff Frequency ($15, 30, 50\text{ Hz}$)**:
+   - Jump height moved by $<3.9\text{ mm}$ across all trials.
+   - Peak mechanical power showed high sensitivity in explosive trials: filtering at $15\text{ Hz}$ vs $30\text{ Hz}$ attenuated peak power by up to $82.4\text{ W}$ in `T02` ($3898\text{ W} \to 3980\text{ W}$) and $79.9\text{ W}$ in `T06` ($4976\text{ W} \to 5056\text{ W}$). Cutoffs $\ge 30\text{ Hz}$ are essential to preserve peak mechanical power transients.
+6. **Pre-Onset Integration Lead ($30, 50, 100\text{ ms}$)**:
+   - Jump height moved by $<7.2\text{ mm}$ across all trials, verifying that baseline quiet-standing integration does not drift significantly.
+7. **Detection Failures**: Exactly **$0$ detection failures** occurred across all $10 \text{ trials} \times 18 \text{ parameter permutations}$ ($180$ pipeline evaluations).
+
+*Figure Reference*: [`reports/figures/cmj_sensitivity.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_sensitivity.png)
+
+---
+
 ## Verification & Test Suite
-The pipeline is verified by **49 automated tests** spanning schemas, validators, analytical synthesizers, and biomechanical phase detectors:
-- Unit & validation suite: `uv run pytest -v` (49 passed).
-- Monte Carlo accuracy: $N = 200$ trials across 9 conditions verifying 95th-percentile bounds for $h_{\text{imp}}$, $h_{\text{flt}}$, onset, takeoff, and landing.
-- Strictly synthetic data; zero external private athlete data accessed.
+The pipeline is verified by **57 automated tests** spanning schemas, validators, analytical synthesizers, biomechanical phase detectors, and real-data verification:
+- Unit, synthetic & real-data suite: `uv run pytest -v -m "not slow"` (56 passed).
+- Monte Carlo accuracy: `uv run pytest tests/test_cmj.py -m slow` ($N = 200$ trials across 9 conditions verifying 95th-percentile bounds for $h_{\text{imp}}$, $h_{\text{flt}}$, onset, takeoff, and landing).
+- Real data test suite: `uv run pytest tests/test_cmj_real.py` (8 passed). Ensures mass plausibility, negative force flagging, timestamp irregularity detection, reference data parsing, and zero private data leakage.
+- AI transparency: All biomechanical equations and signal processing logic cross-checked against peer-reviewed literature (McMahon et al. 2018, Chavda et al. 2018, Linthorne 2001). Results verified against known synthetic ground truths and independent Excel references.
+

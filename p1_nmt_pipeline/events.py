@@ -327,8 +327,8 @@ def detect_cmj_events(
     # Scaled consecutive samples: N = max(1, round(fs * ms / 1000))
     to_consec = max(1, int(round(fs_hz * (thresh.takeoff_consecutive_ms / 1000.0))))
     land_consec = max(1, int(round(fs_hz * (thresh.landing_consecutive_ms / 1000.0))))
-    # Minimum flight phase duration (80 ms) prevents filter edge transients right at takeoff from tripping landing
-    min_flight_samples = max(to_consec * 2, int(round(fs_hz * 0.080)))
+    # Minimum flight phase duration prevents filter edge transients and post-takeoff plate ringing from tripping landing
+    min_flight_samples = max(to_consec * 2, int(round(fs_hz * thresh.min_flight_duration_s)))
 
     # Use raw force if available for initial thresholding to avoid filter ringing
     init_detect_force = force_raw_n if force_raw_n is not None else force_n
@@ -556,18 +556,26 @@ def detect_cmj_events(
             landing_time = float(time_s[landing_idx])
             flight_time = (landing_time - takeoff_time)
 
+
     # 11. Landing Peak Force (strictly AFTER landing)
+    # IMPORTANT: landing peak uses detect_force (raw/unfiltered signal) because
+    # the landing impact is a fast transient (~5 ms rise time) that the 30 Hz
+    # Butterworth filter severely attenuates (up to 16% error). Per Chavda et al.
+    # (2018), peak landing force is measured from the unfiltered signal.
+    # Peak propulsion force (a slower transient) uses the filtered signal as usual.
     landing_peak_idx = None
     landing_peak_time = None
     landing_peak_force = None
 
     if landing_idx is not None and landing_idx < n_samples - 1:
-        post_land_region = working_force[landing_idx:]
+        # Use raw force for landing peak; fall back to working_force if raw unavailable
+        land_force_series = detect_force if force_raw_n is not None else working_force
+        post_land_region = land_force_series[landing_idx:]
         if len(post_land_region) > 0:
             rel_peak = int(np.argmax(post_land_region))
             landing_peak_idx = landing_idx + rel_peak
             landing_peak_time = float(time_s[landing_peak_idx])
-            landing_peak_force = float(working_force[landing_peak_idx])
+            landing_peak_force = float(land_force_series[landing_peak_idx])
 
     return CMJEvents(
         quiet_start_idx=q_start_idx,

@@ -35,6 +35,8 @@ thresholds:
   landing_consecutive_ms: 2.5
   # Minimum consecutive samples fallback if ms is not specified
   takeoff_min_samples: 5
+  # Minimum refractory flight duration before landing search to avoid post-takeoff vibration/ringing
+  min_flight_duration_s: 0.200
   # Flight phase force offset correction: optional flag, off by default per research conventions
   correct_flight_phase_offset: false
   # Flight offset correction model: 'whole_trace' (instrumentation/tare shift, recomputes BW and mass) vs 'flight_only' (flight threshold adjustment)
