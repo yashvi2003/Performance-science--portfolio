@@ -43,8 +43,8 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 - [ ] M5 Tests (alert tiers fire on the right days, no alerts on stable data, SQL = pandas) + README
 
 ## Project 3 - Load, recovery and readiness: real-world-evidence analysis (p3_nmt_profiler)
-- [ ] M1a Data adapters: public wearable/wellness data (e.g. PMData) -> wearable_daily schema (document mapping and proxies)
-- [ ] M1b Written hypotheses and analysis plan BEFORE analysis (question, outcome, predictors, covariates, model, missing-data handling, sensitivity checks)
+- [x] M1a Data adapters: public wearable/wellness data (e.g. PMData) -> wearable_daily schema (document mapping and proxies)
+- [x] M1b Written hypotheses and analysis plan BEFORE analysis (question, outcome, predictors, covariates, model, missing-data handling, sensitivity checks)
 - [ ] M2 Mixed-effects analysis: prior-night sleep and prior-day load vs next-day readiness/fatigue, within-person vs between-person effects, CIs, effect sizes, diagnostics
 - [ ] M3 Causal-thinking section: DAG, confounders, what can and cannot be concluded; sensitivity analysis
 - [ ] M4 Asymmetry module: one documented index, direction, persistence flag, fatigue slope (real if per-limb data exists, otherwise synthetic and labelled)
@@ -107,5 +107,13 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
   - M6a CLI Entry Point: Implemented `p1_nmt_pipeline/cli.py`. Supports single-trial CSV or directory ingestion, automated timestamp resampling and phase analysis, metric registry mapping, strict contract validation via `shared.contract.validate_sessions_df(strict=True)`, and export to `data/processed/sessions.csv`. Automated de-identification mapping (`ATH_01`, `ATH_02`, etc.) prevents leakage of unapproved private IDs.
   - M6b Documentation Polish: Updated `p1_nmt_pipeline/README.md` with complete single-trial report documentation, CLI usage examples, reproducibility instructions, synthetic data disclaimer, AI-use transparency disclosure, and limitations section.
   - Test Suite: Added 3 unit tests for CLI directory execution, CLI single-file processing, and report figure generation in `tests/test_p1_pipeline.py`. Full test suite passes: 73 tests total (72 fast tests passing in ~20s, 1 slow Monte Carlo test).
-  - Scope Agreement: M3 (jump-type classifier), M4a (SJ), M4b (DJ), and M5b (Streamlit) explicitly deferred to future work per user instruction. Project 1 is fully complete. Next: Transition to Project 3 (`p3_nmt_profiler`), starting with verifying PMData's exact license and consent basis in `DATA_SOURCES.md`.
+  - Scope Agreement: M3 (jump-type classifier), M4a (SJ), M4b (DJ), and M5b (Streamlit) explicitly deferred to future work per user instruction. Project 1 is fully complete.
+- 2026-09-22 (Antigravity): Transitioned to Project 3 (`p3_nmt_profiler`), Milestones M1a & M1b:
+  - Provenance Check: Audited PMData publication (Thambawita et al., 2020, MMSys '20, DOI: 10.1145/3339825.3394926). Verified license in official OSF repository `license.txt` is Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0; portal lists CC BY 4.0). Confirmed study protocol evaluated and approved by NSD / Sikt; participants provided written informed consent. Updated `DATA_SOURCES.md` row D2.
+  - Data Ingestion & Download: Authored `scripts/fetch_pmdata_summaries.py` fetching lightweight daily summary CSVs (~300 KB total across all 16 participants: `wellness.csv`, `srpe.csv`, `sleep_score.csv`, `time_in_heart_rate_zones.json`) from OSF repository (`osf.io/vx4bk`).
+  - Wearable Adapter (M1a): Built `p3_nmt_profiler/config.py`, `config.yaml`, and `pmdata_adapter.py`. Mapped Foster's sRPE sum to `day_strain`, PMSys readiness ($1\text{--}10 \to 10\text{--}100$) to `recovery_pct`, Fitbit nocturnal resting heart rate to `rhr_bpm`, and wellness sleep duration to `sleep_hours`. Exported `data/processed/wearable_daily.csv` (2,080 daily rows across 16 athletes); verified strict contract validation via `shared.contract.validate_wearable_daily_csv()`.
+  - Unit Tests: Added 4 tests in `tests/test_p3_pmdata.py` (mock pipeline, real participant, dataset builder, lag features). Full test suite: 76 tests passing (75 fast tests in ~26s, 1 slow Monte Carlo test).
+  - Pre-Registered Analysis Plan (M1b): Authored `p3_nmt_profiler/ANALYSIS_PLAN.md` with plain-language summary, formal directional hypotheses ($H_1$--$H_3$), biological plausibility bounds, person-mean centering formulation ($X_{it} = \bar{X}_i + (X_{it} - \bar{X}_i)$), REML linear mixed-effects model equations, residual diagnostics, DAG confounding analysis, and sensitivity checks.
+  - Next: STOPPED for user review of `ANALYSIS_PLAN.md` before fitting any mixed-effects models.
+
 

@@ -1,0 +1,46 @@
+# Project 3 Configuration: Real-World Evidence Load, Recovery, and Readiness Profiler
+
+dataset:
+  name: "pmdata"
+  raw_dir: "data/raw/pmdata"
+  output_csv: "data/processed/wearable_daily.csv"
+
+proxies:
+  # PMData does not contain native proprietary WHOOP strain (0-21).
+  # Documented strain proxy: Daily Session-RPE (Foster et al., 2001) = sum(perceived_exertion * duration_min).
+  day_strain:
+    source: "pmsys/srpe.csv"
+    method: "sum_srpe"  # sum of perceived_exertion * duration_min per day
+    fill_no_training_days: 0.0  # Zero training load on rest days
+  
+  # PMData does not contain native WHOOP recovery score (0-100%).
+  # Documented recovery proxy: PMSys daily readiness score (scale 1-10 scaled to 0-100%),
+  # or Fitbit sleep overall_score (0-100%).
+  recovery_pct:
+    primary_source: "pmsys/wellness.csv"
+    primary_field: "readiness"
+    scale_factor: 10.0  # 1-10 -> 10-100%
+    fallback_source: "fitbit/sleep_score.csv"
+    fallback_field: "overall_score"
+
+cleaning:
+  # Biological plausibility bounds
+  min_sleep_hours: 2.0
+  max_sleep_hours: 16.0
+  min_rhr_bpm: 35.0
+  max_rhr_bpm: 110.0
+  min_readiness: 1.0
+  max_readiness: 10.0
+  min_fatigue: 1.0
+  max_fatigue: 5.0
+  min_soreness: 1.0
+  max_soreness: 5.0
+  max_daily_strain: 3000.0  # sRPE > 3000 is extreme (>5 hours at RPE 10)
+
+modeling:
+  alpha: 0.05
+  person_mean_center: true  # Currie / Hoffmann decomposition: X_within = X_it - X_bar_i
+  standardize_features: true # z-score within-person predictors for standardized beta
+  random_effects:
+    intercept: true
+    slope: false  # Start with random intercepts; evaluate random slopes via likelihood ratio test
