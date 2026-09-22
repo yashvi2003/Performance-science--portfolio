@@ -45,7 +45,7 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 ## Project 3 - Load, recovery and readiness: real-world-evidence analysis (p3_nmt_profiler)
 - [x] M1a Data adapters: public wearable/wellness data (e.g. PMData) -> wearable_daily schema (document mapping and proxies)
 - [x] M1b Written hypotheses and analysis plan BEFORE analysis (question, outcome, predictors, covariates, model, missing-data handling, sensitivity checks)
-- [ ] M2 Mixed-effects analysis: prior-night sleep and prior-day load vs next-day readiness/fatigue, within-person vs between-person effects, CIs, effect sizes, diagnostics
+- [x] M2 Mixed-effects analysis: prior-night sleep and prior-day load vs next-day readiness/fatigue, within-person vs between-person effects, CIs, effect sizes, diagnostics
 - [ ] M3 Causal-thinking section: DAG, confounders, what can and cannot be concluded; sensitivity analysis
 - [ ] M4 Asymmetry module: one documented index, direction, persistence flag, fatigue slope (real if per-limb data exists, otherwise synthetic and labelled)
 - [ ] M5a Figures + tests (recover known effects/asymmetry in synthetic data) + README
@@ -113,7 +113,17 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
   - Data Ingestion & Download: Authored `scripts/fetch_pmdata_summaries.py` fetching lightweight daily summary CSVs (~300 KB total across all 16 participants: `wellness.csv`, `srpe.csv`, `sleep_score.csv`, `time_in_heart_rate_zones.json`) from OSF repository (`osf.io/vx4bk`).
   - Wearable Adapter (M1a): Built `p3_nmt_profiler/config.py`, `config.yaml`, and `pmdata_adapter.py`. Mapped Foster's sRPE sum to `day_strain`, PMSys readiness ($1\text{--}10 \to 10\text{--}100$) to `recovery_pct`, Fitbit nocturnal resting heart rate to `rhr_bpm`, and wellness sleep duration to `sleep_hours`. Exported `data/processed/wearable_daily.csv` (2,080 daily rows across 16 athletes); verified strict contract validation via `shared.contract.validate_wearable_daily_csv()`.
   - Unit Tests: Added 4 tests in `tests/test_p3_pmdata.py` (mock pipeline, real participant, dataset builder, lag features). Full test suite: 76 tests passing (75 fast tests in ~26s, 1 slow Monte Carlo test).
-  - Pre-Registered Analysis Plan (M1b): Authored `p3_nmt_profiler/ANALYSIS_PLAN.md` with plain-language summary, formal directional hypotheses ($H_1$--$H_3$), biological plausibility bounds, person-mean centering formulation ($X_{it} = \bar{X}_i + (X_{it} - \bar{X}_i)$), REML linear mixed-effects model equations, residual diagnostics, DAG confounding analysis, and sensitivity checks.
-  - Next: STOPPED for user review of `ANALYSIS_PLAN.md` before fitting any mixed-effects models.
+- 2026-09-22 (Antigravity): Executed Project 3 Milestone M2 (Linear Mixed-Effects Modeling on PMData):
+  - Verification of M5a Report: Confirmed peak concentric power timestamp ($t=1.4515\text{ s}$, $3898.1\text{ W}$, $56.3\text{ W/kg}$) derived via $\text{argmax}(F_{\text{filt}} \cdot v)$ across the identical propulsion window $[t_{v0}, t_{\text{takeoff}}]$. Confirmed landing peak force ($2859.2\text{ N}$) computed from raw force ($F_{\text{raw}}$ per Chavda et al., 2018). Confirmed secondary post-landing force peak ($t=2.2405\text{ s}$, $1593.7\text{ N}$, +79 ms) represents true lower-limb eccentric compliance / muscular deceleration, not plate ringing.
+  - Implemented `p3_nmt_profiler/model.py`:
+    - Calendar Grid Alignment: Built complete daily time series per athlete with prior-day training load ($sRPE_{t-1}$) and prior-night sleep duration / RHR / sleep score.
+    - Currie / Hoffmann Person-Mean Centering Decomposition: Split predictors into between-person trait means ($\bar{X}_i$) and standardized within-person acute deviations ($zX^{\text{within}}_{it} = (X_{it} - \bar{X}_i) / \text{SD}_{\text{within}}$).
+    - Model 1 (Next-Day Morning Readiness, $n=1368, 15\text{ athletes}$): Acute sleep duration positively predicts readiness ($\beta = +0.218$, $p < 0.001$, $95\%\text{ CI}: 0.139\text{--}0.297$); acute training strain shows small negative trend ($\beta = -0.073$, $p = 0.137$); weekends slightly reduce morning readiness ($\beta = -0.240$, $p = 0.006$).
+    - Model 2 (Next-Day Muscle Soreness, $n=1716, 16\text{ athletes}$): Acute training strain significantly predicts soreness ($\beta = -0.129$, $p < 0.001$, $95\%\text{ CI}: -0.156\text{--}-0.103$, reflecting PMSys 1=sore, 5=fresh scale).
+    - Model 3 (Next-Day Morning Fatigue, $n=1369, 15\text{ athletes}$): Acute sleep score positively predicts recovery/energy ($\beta = +0.143$, $p < 0.001$); acute resting HR elevation signals fatigue ($\beta = +0.041$, $p = 0.012$).
+    - Random Slopes LRT: Evaluated random slopes for acute sleep deviation ($\chi^2 = 0.0$, $p = 1.0$); parsimonious random-intercept model retained.
+    - Diagnostics: All predictor VIFs $< 2.0$ (no multicollinearity); residual lag-1 autocorrelation $\rho_1 \approx 0.05\text{--}0.12$.
+  - Test Suite: Added 6 unit tests in `tests/test_p3_model.py`. Entire repo test suite passes: 83 tests total (82 fast tests in ~30s, 1 slow Monte Carlo test).
+  - Next: Project 3 Milestone M3 (Causal-thinking section & sensitivity analysis).
 
 

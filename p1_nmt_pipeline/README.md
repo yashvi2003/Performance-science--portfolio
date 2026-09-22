@@ -219,6 +219,7 @@ A publication-grade diagnostic report figure was developed to provide high-densi
   - Peak Propulsion Force ($\text{N}$ & $\text{BW}$)
   - Landing Peak Impact Force ($\text{N}$ & $\text{BW}$)
   - Athlete Body Mass ($\text{kg}$ & $\text{N}$)
+  - **Signal Processing & Landing Stage Definitions**: The pipeline deliberately differentiates signal conditioning across landing analysis stages: (1) *Initial contact threshold crossing* uses **raw force** ($F_{\text{raw}} \ge 10\text{ N} + F_{\text{offset}}$) to avoid low-pass filter edge-smearing and preserve millisecond-accurate touchdown timing; (2) *Double-integration of acceleration* uses **$30\text{ Hz}$ zero-phase low-pass filtered force** ($F_{\text{filt}}$) to eliminate high-frequency plate vibration artifacts and prevent cumulative drift; (3) *Velocity-trough inflection point* occurs downstream when $F_{\text{filt}} \ge BW$, where net acceleration switches from downward to upward; and (4) *Landing peak impact force* is extracted strictly from **raw force** ($F_{\text{raw}}$ per Chavda et al., 2018) because aggressive filtering severely attenuates fast transient impact spikes (~5 ms rise time).
 - **Privacy & Anonymization Compliance**: Fully compliant with repository privacy guardrails; pulls directly from validated pipeline outputs without hardcoding athlete identifiers or exposing unapproved metadata.
 
 *Figure Reference*: [`reports/figures/cmj_single_trial_report.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_single_trial_report.png)
