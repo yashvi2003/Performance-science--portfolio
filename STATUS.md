@@ -47,9 +47,9 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 - [x] M1b Written hypotheses and analysis plan BEFORE analysis (question, outcome, predictors, covariates, model, missing-data handling, sensitivity checks)
 - [x] M2 Mixed-effects analysis: prior-night sleep and prior-day load vs next-day readiness/fatigue, within-person vs between-person effects, CIs, effect sizes, diagnostics
 - [x] M3 Causal-thinking section: DAG, confounders, what can and cannot be concluded; sensitivity analysis
-- [ ] M4 Asymmetry module: one documented index, direction, persistence flag, fatigue slope (real if per-limb data exists, otherwise synthetic and labelled)
+- [x] M4 Asymmetry module: one documented index, direction, persistence flag, fatigue slope (real if per-limb data exists, otherwise synthetic and labelled)
 - [x] M5a Figures + tests (recover known effects/asymmetry in synthetic data) + README
-- [ ] M5b Portfolio research brief (2 pages: question, methods, data provenance, results, limitations)
+- [x] M5b Portfolio research brief (2 pages: question, methods, data provenance, results, limitations)
 
 ## Stretch goals (not counted in progress)
 - [ ] S3 IMTP metrics (onset, peak force gross/net, time-specific force, RFD, pre-tension flag) + tests
@@ -88,6 +88,13 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
   - Confirmed professor approved analysing `CMJ.xlsx` and `CMJ_Force_Time_Analysis.xlsx` (datasets D1 & D1b) with this cloud AI tool.
   - Anonymized results (aggregate metrics, summary plots, statistics) are permitted in the public repository and README.
   - Raw files must never be committed, published, or shown in public screenshots; verified `*.xlsx`, `data/raw/`, and `data/private/` remain in `.gitignore`.
+- 2026-09-22 (Antigravity): Completed Project 3 Milestones M4 (Asymmetry Module) & M5b (Research Brief), and R Cross-Check:
+  - Formulated defensible single headline reliability citation for M2g: CMJNA balanced 4-trial protocol ($\text{ICC}(2, 1) = 0.906$, $\text{CV} = 4.92\%$, $\text{SEM} = 2.55\text{ cm}$, $\text{MDC}_{95} = 7.07\text{ cm}$ on $n=66 \times 4 = 264$ trials).
+  - R Cross-Check (`lme4`): Authored `p3_nmt_profiler/r_crosscheck.R` validating Model 1 against `statsmodels` (both yield $\beta_{\text{within\_sleep}} = +0.2183$, $\text{SE} = 0.0403$, $95\%\text{ CI}: [0.1394, 0.2972]$, identical to 4 decimal places).
+  - Milestone M4 (`p3_nmt_profiler/asymmetry.py`): Implemented Bilateral Asymmetry Index (BAI), Limb Symmetry Index (LSI), multi-session persistence tracker, and fatigue-sensitivity longitudinal slope estimator. Added unit tests in `tests/test_p3_asymmetry.py` (all passing).
+  - Milestone M5b (`reports/p3_research_brief.md` & `p3_nmt_profiler/README.md`): Authored comprehensive 2-page research brief with question, methods, data provenance, empirical results, transparent null findings ($H_2, H_{3b}$), and research limitations.
+  - Test Suite: 86 unit tests passing repository-wide. Project 3 is 100% complete (7/7 milestones). Next: Project 2 (`p2_nmt_reports`).
+
   - Milestone M2c remains unstarted as instructed. Next: await explicit instruction before proceeding to M2c.
 - 2026-09-22 (Antigravity): Completed and finalized Project 1 Milestone M2g (Open Data Validation & Reliability on White et al., Zenodo DOI: 10.5281/zenodo.19136480, PLOS ONE DOI: 10.1371/journal.pone.0263846).
   - Pre-Verification & Data Integrity: Reconciled cohort size across metadata and array indices: exactly 67 unique participants are present in `cmj_dataset_both.npz` (`subject_ids` 0..68 with indices 14 and 29 omitted due to missing synchronized accelerometer data; 67 unique original IDs). Clarified that `n_subjects=69` is a study-level cohort metadata note.

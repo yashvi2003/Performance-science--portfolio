@@ -12,3 +12,4 @@ __pycache__/
 # Outputs that may embed real data
 outputs_private/
 desktop.ini
+*.vsix
