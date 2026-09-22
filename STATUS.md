@@ -32,7 +32,7 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 
 ## Project 2 - Baselines, readiness, SQL and longitudinal reporting (p2_nmt_reports)
 - [x] M1a Loaders (via shared/contract.py) + rolling personal baselines
-- [ ] M1b SQL layer: load contract tables into DuckDB; baselines, rolling windows, session summaries as .sql files using window functions, run from Python, tested against equivalent pandas calculations (SQL result == pandas result)
+- [x] M1b SQL layer: load contract tables into DuckDB; baselines, rolling windows, session summaries as .sql files using window functions, run from Python, tested against equivalent pandas calculations (SQL result == pandas result)
 - [ ] M2a Readiness index: personal baseline z-scores, direction-aware, documented weights (heuristic label)
 - [ ] M2b Wearable daily join: date join + column map onto wearable_daily.csv contract fields (recovery_pct, hrv_ms, rhr_bpm, day_strain, sleep_hours)
 - [ ] M2d Within-athlete change model: mixed-effects (random intercept, slope if data allows) in Python/statsmodels ONLY; effect sizes with CIs; diagnostics. Real longitudinal data if Philipp et al. OSF dataset (osf.io/bq7n9) has session metrics, else clearly labelled synthetic longitudinal data. Demonstration of method.
