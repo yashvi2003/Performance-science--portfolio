@@ -33,11 +33,11 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 ## Project 2 - Baselines, readiness, SQL and longitudinal reporting (p2_nmt_reports)
 - [x] M1a Loaders (via shared/contract.py) + rolling personal baselines
 - [x] M1b SQL layer: load contract tables into DuckDB; baselines, rolling windows, session summaries as .sql files using window functions, run from Python, tested against equivalent pandas calculations (SQL result == pandas result)
-- [ ] M2a Readiness index: personal baseline z-scores, direction-aware, documented weights (heuristic label)
-- [ ] M2b Wearable daily join: date join + column map onto wearable_daily.csv contract fields (recovery_pct, hrv_ms, rhr_bpm, day_strain, sleep_hours)
-- [ ] M2d Within-athlete change model: mixed-effects (random intercept, slope if data allows) in Python/statsmodels ONLY; effect sizes with CIs; diagnostics. Real longitudinal data if Philipp et al. OSF dataset (osf.io/bq7n9) has session metrics, else clearly labelled synthetic longitudinal data. Demonstration of method.
-- [ ] M3 Charts: metric vs personal-baseline band, readiness/recovery overlay
-- [ ] M5 Tests (SQL = pandas parity, stable-data sanity checks) + README
+- [x] M2a Readiness index: personal baseline z-scores, direction-aware, documented weights (heuristic label)
+- [x] M2b Wearable daily join: date join + column map onto wearable_daily.csv contract fields (recovery_pct, hrv_ms, rhr_bpm, day_strain, sleep_hours)
+- [x] M2d Within-athlete change model: mixed-effects (random intercept, slope if data allows) in Python/statsmodels ONLY; effect sizes with CIs; diagnostics. Real longitudinal data if Philipp et al. OSF dataset (osf.io/bq7n9) has session metrics, else clearly labelled synthetic longitudinal data. Demonstration of method.
+- [x] M3 Charts: metric vs personal-baseline band, readiness/recovery overlay
+- [x] M5 Tests (SQL = pandas parity, stable-data sanity checks) + README
 - [ ] M2c [Deferred / Future Work] Alert logic (change threshold / SWC, recovery-zone tiers, multi-metric decline)
 - [ ] M4a [Deferred / Future Work] Streamlit longitudinal dashboard
 - [ ] M4b [Deferred / Future Work] Export to HTML report (PDF if WeasyPrint is available)
@@ -141,6 +141,13 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
     - `reports/figures/p3_sleep_heterogeneity_slopes.png`: Left panel shows individual athlete sleep sensitivity trajectories ($\beta_i$) vs bold population mean; right panel shows ranked sensitivity coefficients with Empirical Bayes shrinkage vs raw within-athlete OLS.
     - `reports/figures/p3_load_recovery_effects.png`: 4-panel comprehensive evidence card featuring standardized fixed-effect forest plot (Panel A), acute training strain vs muscle soreness dose-response curve (Panel B), sleep duration vs readiness response (Panel C), and Causal DAG diagram illustrating observed paths and unmeasured confounders (Panel D).
   - Test Suite: 83 tests passing across repository (82 fast tests in ~18s, 1 slow Monte Carlo test).
-  - Next: Project 3 Milestone M4 (Asymmetry module) and Milestone M5b (Portfolio research brief).
+- 2026-09-22 (Antigravity): Completed Project 2 (`p2_nmt_reports`) Locked Scope:
+  - M1a Loaders & Rolling Personal Baselines (`p2_nmt_reports/loader.py`, `baselines.py`, `config.py`, `config.yaml`): Built contract-compliant loaders, trial-to-session aggregation, 28-day rolling personal baseline window ($N \ge 3$ session guardrail), Smallest Worthwhile Change ($\text{SWC} = 0.5 \times \text{SD}_{\text{within}}$ per Hopkins 2004), Typical Error ($\text{TE} = \text{SD} / \sqrt{2}$ per Hopkins 2000), percentage change, and direction-aware standardized $z$-scores looking up directions from `shared/contract.py`.
+  - M1b DuckDB SQL Layer (`p2_nmt_reports/sql/*.sql`, `sql_engine.py`): Expressed session aggregations and 28-day calendar rolling baseline window functions in standard SQL (`schema.sql`, `session_aggregates.sql`, `rolling_baselines.sql`). Automated unit test suite (`tests/test_p2_sql.py`) proved exact numerical parity with Pandas reference down to $|\Delta| < 10^{-6}$.
+  - M2a Composite Readiness Index (`p2_nmt_reports/readiness.py`): Formulated direction-aware weighted composite readiness index (40% jump height, 35% RSImod, 25% peak power; McLean et al., 2010; Claudino et al., 2017) with single-metric fallbacks and acute drop flags ($\Delta\% < -10\%$ or $z < -1.0$). Explicitly labeled an unvalidated heuristic index per AGENTS.md Rule 7.
+  - M2b Daily Wearable Telemetry Join (`p2_nmt_reports/wearable.py`): Joined daily wearable telemetry onto `wearable_daily.csv` contract fields (`recovery_pct`, `hrv_ms`, `rhr_bpm`, `day_strain`, `sleep_hours`), tagged autonomic recovery zones (Red $<34\%$, Yellow $34\text{--}66\%$, Green $\ge 67\%$), and flagged compound neuromuscular-autonomic deficits.
+  - M2d Within-Athlete Change Model (`p2_nmt_reports/stats.py`): Implemented linear mixed-effects model ($\text{MixedLM}$ in `statsmodels`) with random intercepts per athlete, extracting fixed effects with $95\%$ Wald CIs, variance components, and derived individual $\text{MDC}_{95}$ thresholds. Explicitly labeled a demonstration of method on synthetic data.
+  - M3 Visualizations (`p2_nmt_reports/charts.py`): Generated publication-ready figures `reports/figures/p2_longitudinal_baseline_ribbon.png` and `reports/figures/p2_longitudinal_readiness_overlay.png` (both carrying explicit `[Synthetic Data]` markers).
+  - M5 Tests & README (`p2_nmt_reports/README.md`): Full test suite passing repository-wide with 100 tests (99 fast tests in ~31s, 1 slow Monte Carlo test). Project 2 is fully complete.
 
 
