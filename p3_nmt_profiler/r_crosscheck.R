@@ -70,4 +70,5 @@ cat(sprintf("    R lme4:          beta = +%.4f, SE = %.4f, 95%% CI = [%.4f, %.4f
             fe_r["z_dev_prior_sleep_hours"], se_r["z_dev_prior_sleep_hours"],
             conf_ints["z_dev_prior_sleep_hours", 1], conf_ints["z_dev_prior_sleep_hours", 2]))
 cat(sprintf("    Py statsmodels:  beta = +0.2183, SE = 0.0403, 95%% CI = [0.1394, 0.2972]\n"))
-cat(sprintf("    Numerical Diff:  |Delta beta| < 0.0001 (Identical to 4 decimal places)\n"))
+diff_beta <- abs(fe_r["z_dev_prior_sleep_hours"] - 0.21828)
+cat(sprintf("    Numerical Diff:  |Delta beta| = %.6f\n", diff_beta))
