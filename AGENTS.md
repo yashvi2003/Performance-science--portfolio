@@ -32,14 +32,16 @@ This file is the standing instruction set. Read it at the start of every session
 8. Data provenance (mandatory):
    - Every dataset used is logged in `DATA_SOURCES.md`: source/URL/DOI, licence or consent basis, n
      (athletes, sessions, trials), device and sampling rate, file format, what it is used for.
-   - Real athlete data is de-identified (athlete IDs only), never committed (`data/raw/` is gitignored),
+   - Real athlete data is de-identified, never committed (`data/raw/` and `data/private/` are gitignored; `*.xlsx` is gitignored),
      and never published without the user confirming they have permission.
    - Third-party data is cited and its licence respected. Do not redistribute it.
-   - PUBLIC-SAFETY DEFAULT: nothing derived from dataset D1 (the professor-supplied athlete data) may appear in public
-     artifacts (README numbers, screenshots, plots, notebooks) unless DATA_SOURCES.md records that permission was
-     granted, and at which level (analysis only / anonymised results / raw data). Public demos use synthetic data.
-   - CLOUD-AI GUARDRAIL: do not open, read or process anything in `data/private/` or `data/raw/` unless STATUS.md records that the
-     professor approved analysing the athlete data with cloud AI tools. Until then use synthetic data only.
+   - PROFESSOR PERMISSION & PUBLIC ARTIFACT GUARDRAILS:
+     - The professor has approved analysing `CMJ.xlsx` and `CMJ_Force_Time_Analysis.xlsx` (datasets D1 & D1b) with this cloud AI tool.
+     - Anonymized results (aggregate metrics, summary plots, statistics) are permitted in the public repository and README.
+     - The raw files themselves (`CMJ.xlsx`, `CMJ_Force_Time_Analysis.xlsx`, or any raw force trace) must NEVER be committed, published, or shown in public screenshots.
+     - Confirm `*.xlsx` stays in `.gitignore` at all times.
+     - ANONYMIZATION CONSTRAINT: Do NOT treat `A01-A10` as a confirmed anonymization scheme. Do not put those IDs (`A01-A10`) or anything that could re-identify an athlete in public outputs, tables, plots, or READMEs.
+
 9. Research conventions:
    - Each project README opens with the question it addresses, the analysis plan, and closes with
      limitations. Report uncertainty (CIs), not just point estimates.

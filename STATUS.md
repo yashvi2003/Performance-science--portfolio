@@ -84,3 +84,9 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
   3. (c) Integration-start lead offsets: verified configurable `integration_lead_s` across 30, 50, and 100 ms on ramped-onset trials in `test_integration_start_offsets_comparison` (all biases +0.70 mm, well within 1.5 mm tolerance).
   4. Fixed RSImod sentence in `p1_nmt_pipeline/README.md`: explicitly stated "An onset delay shortens detected contraction time, which artificially inflates RSImod ($\text{RSImod} = h_{\text{imp}} / \text{CT}$)."
   5. Full test suite: 49 passed (0 failed, 0 skipped, 0 deselected) in ~123s including slow Monte Carlo test. Synthetic data only. M2c not started.
+- 2026-09-22 (Antigravity): Updated AGENTS.md and DATA_SOURCES.md per professor approval.
+  - Confirmed professor approved analysing `CMJ.xlsx` and `CMJ_Force_Time_Analysis.xlsx` (datasets D1 & D1b) with this cloud AI tool.
+  - Anonymized results (aggregate metrics, summary plots, statistics) are permitted in the public repository and README.
+  - Raw files must never be committed, published, or shown in public screenshots; verified `*.xlsx`, `data/raw/`, and `data/private/` remain in `.gitignore`.
+  - Anonymization constraint: `A01-A10` is NOT a confirmed anonymization scheme; neither these IDs nor re-identifying details may appear in public outputs.
+  - Milestone M2c remains unstarted as instructed. Next: await explicit instruction before proceeding to M2c.
