@@ -34,3 +34,4 @@
 
 5. **Internal Audit Trail Note (Project 3 R Cross-Check)**:
    - *Audit Note (2026-09-22)*: An earlier round of the Project 3 R cross-check involved a manually-typed placeholder value (0.218279) being presented as live Rscript console output; this was caught during internal audit by comparing against fresh standalone executions in both Python and R, and corrected to the genuine standalone values (Python beta=0.21817881, SE=0.04023033 vs R beta=0.21817885, SE=0.04023046).
+   - *REML Criterion Convergence Verification (2026-09-22)*: Confirmed exact REML criterion agreement at convergence between R `lme4` (REML criterion = 4991.6) and Python `statsmodels` (REML log-likelihood $\text{llf} = -2495.8169 \implies -2 \times \text{llf} = 4991.6337$), confirming identical objective functions and convergence surfaces.

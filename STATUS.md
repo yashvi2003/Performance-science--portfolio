@@ -31,16 +31,16 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 - [ ] M5b [Deferred / Future Work] Minimal Streamlit app: drop a file, see detected jump type, metrics and graphs
 
 ## Project 2 - Baselines, readiness, SQL and longitudinal reporting (p2_nmt_reports)
-- [ ] M1a Loaders (via shared contract) + rolling personal baselines
-- [ ] M1b SQL layer: load contract tables into DuckDB/SQLite; baselines, rolling windows and session summaries as .sql files (window functions), run from Python and tested against the pandas results
-- [ ] M2a Readiness index (personal baseline z-scores, direction-aware, documented weights, heuristic label)
-- [ ] M2b Wearable daily join (date join, column map; WHOOP-compatible field names, no WHOOP data used)
-- [ ] M2c Alert logic (change threshold / SWC, recovery-zone tiers, multi-metric decline)
-- [ ] M2d Within-athlete change model: mixed-effects (random intercept, slope if data allows) in R (lme4) or statsmodels; effect sizes with CIs; diagnostics. The professor's CMJ data has ONE trial per athlete, so this runs on real longitudinal data only if the Philipp et al. OSF dataset (osf.io/bq7n9, 12 basketball players, 219 weekly screenings) turns out to contain usable session-level metrics; otherwise on labelled synthetic data. Either way it is a demonstration of the method, not a new finding
-- [ ] M3 Charts (metric vs baseline band, recovery overlay)
-- [ ] M4a Streamlit longitudinal dashboard
-- [ ] M4b Export to HTML report (PDF if WeasyPrint is available)
-- [ ] M5 Tests (alert tiers fire on the right days, no alerts on stable data, SQL = pandas) + README
+- [x] M1a Loaders (via shared/contract.py) + rolling personal baselines
+- [ ] M1b SQL layer: load contract tables into DuckDB; baselines, rolling windows, session summaries as .sql files using window functions, run from Python, tested against equivalent pandas calculations (SQL result == pandas result)
+- [ ] M2a Readiness index: personal baseline z-scores, direction-aware, documented weights (heuristic label)
+- [ ] M2b Wearable daily join: date join + column map onto wearable_daily.csv contract fields (recovery_pct, hrv_ms, rhr_bpm, day_strain, sleep_hours)
+- [ ] M2d Within-athlete change model: mixed-effects (random intercept, slope if data allows) in Python/statsmodels ONLY; effect sizes with CIs; diagnostics. Real longitudinal data if Philipp et al. OSF dataset (osf.io/bq7n9) has session metrics, else clearly labelled synthetic longitudinal data. Demonstration of method.
+- [ ] M3 Charts: metric vs personal-baseline band, readiness/recovery overlay
+- [ ] M5 Tests (SQL = pandas parity, stable-data sanity checks) + README
+- [ ] M2c [Deferred / Future Work] Alert logic (change threshold / SWC, recovery-zone tiers, multi-metric decline)
+- [ ] M4a [Deferred / Future Work] Streamlit longitudinal dashboard
+- [ ] M4b [Deferred / Future Work] Export to HTML report (PDF if WeasyPrint is available)
 
 ## Project 3 - Load, recovery and readiness: real-world-evidence analysis (p3_nmt_profiler)
 - [x] M1a Data adapters: public wearable/wellness data (e.g. PMData) -> wearable_daily schema (document mapping and proxies)

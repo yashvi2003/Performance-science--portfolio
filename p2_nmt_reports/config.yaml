@@ -1,0 +1,26 @@
+# Project 2 Configuration: Baseline Windows, Alert Rules, and Readiness Weights
+
+baselines:
+  rolling_window_days: 28        # Rolling calendar-day baseline window
+  min_sessions_for_baseline: 3   # Minimum valid sessions before establishing baseline
+  swc_method: "individual_0.5sd" # 'individual_0.5sd' (0.5 * SD_within) or 'cohort_0.2sd' (0.2 * SD_between)
+  swc_multiplier: 0.5            # Multiplier for within-athlete SD
+  typical_error_type: "cv_te"    # Typical error calculation type
+
+readiness:
+  composite_weights:
+    cmj_jump_height_imp: 0.40
+    cmj_rsimod: 0.35
+    cmj_peak_power: 0.25
+  fallback_single_metric: "cmj_jump_height_imp"
+  drop_threshold_pct: 10.0       # Minimum percent drop to flag acute change (10%)
+  use_swc_threshold: true        # If true, drop threshold is max(10%, SWC)
+  heuristic_label: "Experimental Heuristic Index (Unvalidated Score)"
+
+wearable:
+  recovery_zones:
+    red_upper: 33.0              # Recovery < 34% (Red)
+    yellow_lower: 34.0
+    yellow_upper: 66.0           # Recovery 34-66% (Yellow)
+    green_lower: 67.0            # Recovery >= 67% (Green)
+  consecutive_red_days_alert: 2  # N consecutive red recovery days for Tier 2 alert
