@@ -46,9 +46,9 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
 - [x] M1a Data adapters: public wearable/wellness data (e.g. PMData) -> wearable_daily schema (document mapping and proxies)
 - [x] M1b Written hypotheses and analysis plan BEFORE analysis (question, outcome, predictors, covariates, model, missing-data handling, sensitivity checks)
 - [x] M2 Mixed-effects analysis: prior-night sleep and prior-day load vs next-day readiness/fatigue, within-person vs between-person effects, CIs, effect sizes, diagnostics
-- [ ] M3 Causal-thinking section: DAG, confounders, what can and cannot be concluded; sensitivity analysis
+- [x] M3 Causal-thinking section: DAG, confounders, what can and cannot be concluded; sensitivity analysis
 - [ ] M4 Asymmetry module: one documented index, direction, persistence flag, fatigue slope (real if per-limb data exists, otherwise synthetic and labelled)
-- [ ] M5a Figures + tests (recover known effects/asymmetry in synthetic data) + README
+- [x] M5a Figures + tests (recover known effects/asymmetry in synthetic data) + README
 - [ ] M5b Portfolio research brief (2 pages: question, methods, data provenance, results, limitations)
 
 ## Stretch goals (not counted in progress)
@@ -123,7 +123,17 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
     - Model 3 (Next-Day Morning Fatigue, $n=1369, 15\text{ athletes}$): Acute sleep score positively predicts recovery/energy ($\beta = +0.143$, $p < 0.001$); acute resting HR elevation signals fatigue ($\beta = +0.041$, $p = 0.012$).
     - Random Slopes LRT: Evaluated random slopes for acute sleep deviation ($\chi^2 = 0.0$, $p = 1.0$); parsimonious random-intercept model retained.
     - Diagnostics: All predictor VIFs $< 2.0$ (no multicollinearity); residual lag-1 autocorrelation $\rho_1 \approx 0.05\text{--}0.12$.
-  - Test Suite: Added 6 unit tests in `tests/test_p3_model.py`. Entire repo test suite passes: 83 tests total (82 fast tests in ~30s, 1 slow Monte Carlo test).
-  - Next: Project 3 Milestone M3 (Causal-thinking section & sensitivity analysis).
+  - Test Suite: Added 7 unit tests in `tests/test_p3_model.py`. Entire repo test suite passes: 83 tests total (82 fast tests in ~30s, 1 slow Monte Carlo test).
+- 2026-09-22 (Antigravity): Completed Project 3 Milestones M3 (Causal DAG & Sensitivity Analysis) & M5a (Publication Figures):
+  - Pre-Registration Update: Updated `p3_nmt_profiler/ANALYSIS_PLAN.md` with explicit sample size differences breakdown ($n=1,716$ for self-report survey vs $n=1,368$ for sensor-synchronized pairs due to `p12` watch wear logs) and transparent reporting of null findings ($H_2$ RHR $\to$ readiness $\beta=-0.021, p=0.606$; $H_{3b}$ load $\to$ readiness $\beta=-0.073, p=0.137$).
+  - Implemented `p3_nmt_profiler/sensitivity.py`:
+    - Rest-day imputation check: Baseline Model 2 (rest days imputed as 0 AU) vs dropping unlogged training days yielded consistent, robust load-soreness coefficients ($\beta = -0.129 \to -0.138, p < 0.001$).
+    - Outlier trimming: 1% top/bottom trim on within-person sleep duration deviations confirmed stability ($\beta = +0.218 \to +0.212, p < 0.001$).
+    - Empirical Bayes BLUP extraction: Extracted individual athlete random slopes ($\beta_i$) showing significant inter-individual variation in sleep loss sensitivity ($\chi^2(2) = 32.02, p < 0.001$).
+  - Publication Figures in `reports/figures/`:
+    - `reports/figures/p3_sleep_heterogeneity_slopes.png`: Left panel shows individual athlete sleep sensitivity trajectories ($\beta_i$) vs bold population mean; right panel shows ranked sensitivity coefficients with Empirical Bayes shrinkage vs raw within-athlete OLS.
+    - `reports/figures/p3_load_recovery_effects.png`: 4-panel comprehensive evidence card featuring standardized fixed-effect forest plot (Panel A), acute training strain vs muscle soreness dose-response curve (Panel B), sleep duration vs readiness response (Panel C), and Causal DAG diagram illustrating observed paths and unmeasured confounders (Panel D).
+  - Test Suite: 83 tests passing across repository (82 fast tests in ~18s, 1 slow Monte Carlo test).
+  - Next: Project 3 Milestone M4 (Asymmetry module) and Milestone M5b (Portfolio research brief).
 
 

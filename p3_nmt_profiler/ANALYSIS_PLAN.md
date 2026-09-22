@@ -222,5 +222,11 @@ Following user review and approval, Models 1–3 were fit via REML using `p3_nmt
 | **$H_{3a}$: Training Load $\to$ Soreness** | $zLoad^{\text{within}}_{it-1}$ | **$-0.129$** | **$<0.001$** | $[-0.156, -0.103]$ | **Supported**: Prior-day training load significantly elevates muscle soreness (PMSys 1=sore scale). |
 | **$H_{3b}$: Training Load $\to$ Readiness** | $zLoad^{\text{within}}_{it-1}$ | $-0.073$ | $0.137$ | $[-0.169, +0.023]$ | **Null / Non-Significant Trend**: Prior-day load shows a negative trend but did not reach significance in Model 1. |
 
+### Missing-Data Handling & Sample Size Variations Across Models
+
+Sample size differences across models reflect data source availability and complete-case matching requirements:
+- **Model 2 (Soreness, $n=1,716$ across 16 athletes)** requires only PMSys self-report data (morning soreness, sleep duration) paired with prior-day sRPE, and is therefore available across all 16 participants.
+- **Model 1 (Readiness, $n=1,368$ across 15 athletes)** and **Model 3 (Fatigue, $n=1,369$ across 15 athletes)** require concurrent synchronization of PMSys morning surveys with Fitbit nocturnal wearable logs (`sleep_score.csv` / `resting_heart_rate`). Participant `p12` did not record synchronized Fitbit sleep score metrics and is thus excluded from sensor-dependent models, while individual missing watch-wear nights reduce the matched observation count from 1,716 to ~1,368.
+
 > **Transparency Note on Null Findings**: Non-significant findings for $H_2$ (RHR $\to$ readiness) and $H_{3b}$ (Training load $\to$ readiness) are retained and reported with full confidence intervals in all portfolio summaries and research briefs. Observational nocturnal RHR alone did not serve as a reliable standalone proxy for next-day subjective readiness in this cohort once sleep duration was controlled.
 

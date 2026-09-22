@@ -94,3 +94,30 @@ def test_run_all_models_pipeline(sample_pmdata_dir: Path) -> None:
     assert m2.model_name == "Model 2: Next-Day Muscle Soreness"
     assert m3.model_name == "Model 3: Next-Day Fatigue"
     assert "supports_random_slopes" in rs
+
+
+def test_sensitivity_analyses(sample_pmdata_dir: Path) -> None:
+    from p3_nmt_profiler.sensitivity import (
+        run_rest_day_sensitivity,
+        run_outlier_trimming_sensitivity,
+        extract_individual_athlete_slopes,
+        run_all_sensitivities,
+    )
+    df = prepare_longitudinal_dataset(sample_pmdata_dir)
+    s1 = run_rest_day_sensitivity(df)
+    assert s1.baseline_p < 0.001
+    assert s1.perturbed_p < 0.001
+
+    s2 = run_outlier_trimming_sensitivity(df)
+    assert s2.baseline_p < 0.001
+    assert s2.perturbed_p < 0.001
+
+    slopes = extract_individual_athlete_slopes(df)
+    assert len(slopes) >= 10
+    assert all(hasattr(s, "blup_slope") for s in slopes)
+
+    full_sens = run_all_sensitivities(sample_pmdata_dir)
+    assert "rest_day_sensitivity" in full_sens
+    assert "outlier_sensitivity" in full_sens
+    assert "athlete_slopes" in full_sens
+
