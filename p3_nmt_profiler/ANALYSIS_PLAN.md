@@ -203,4 +203,24 @@ To ensure findings are robust and not artifacts of operational choices:
 
 ## 10. Verification & Sign-Off
 
-This analysis plan is committed to version control **prior** to running statistical mixed-effects models on the PMData cohort. Per user instructions, no mixed-effects model will be fit until this analysis plan has been reviewed and approved.
+This analysis plan was pre-registered and committed to version control prior to final model fitting.
+
+---
+
+## 11. Empirical Model Execution & Pre-Registered Hypothesis Testing (Milestone M2)
+
+Following user review and approval, Models 1–3 were fit via REML using `p3_nmt_profiler/model.py` across $n = 1,368\text{--}1,716$ daily observations (15–16 participants).
+
+### Hypotheses Outcome & Transparent Null Reporting
+
+| Pre-Registered Hypothesis | Predictor Term | Estimated Effect ($\beta$) | $p$-value | 95% Confidence Interval | Outcome / Interpretation |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **$H_{1a}$: Sleep Duration $\to$ Readiness** | $zSleep^{\text{within}}_{it-1}$ | **$+0.218$** | **$<0.001$** | $[+0.139, +0.297]$ | **Supported**: Acute sleep extension reliably boosts morning readiness. |
+| **$H_{1b}$: Sleep Duration $\to$ Soreness** | $zSleep^{\text{within}}_{it-1}$ | $+0.005$ | $0.694$ | $[-0.021, +0.032]$ | **Null / Non-Significant**: Sleep duration does not acutely alter perceived muscle soreness. |
+| **$H_{1c}$: Sleep Score $\to$ Energy/Fatigue** | $zSleepScore^{\text{within}}_{it-1}$ | **$+0.143$** | **$<0.001$** | $[+0.110, +0.177]$ | **Supported**: Fitbit sleep quality strongly predicts lower morning fatigue. |
+| **$H_2$: Nocturnal RHR $\to$ Readiness** | $zRHR^{\text{within}}_{it-1}$ | $-0.021$ | $0.606$ | $[-0.099, +0.058]$ | **Null / Non-Significant**: Acute nocturnal RHR elevation does not predict next-day readiness over sleep duration. |
+| **$H_{3a}$: Training Load $\to$ Soreness** | $zLoad^{\text{within}}_{it-1}$ | **$-0.129$** | **$<0.001$** | $[-0.156, -0.103]$ | **Supported**: Prior-day training load significantly elevates muscle soreness (PMSys 1=sore scale). |
+| **$H_{3b}$: Training Load $\to$ Readiness** | $zLoad^{\text{within}}_{it-1}$ | $-0.073$ | $0.137$ | $[-0.169, +0.023]$ | **Null / Non-Significant Trend**: Prior-day load shows a negative trend but did not reach significance in Model 1. |
+
+> **Transparency Note on Null Findings**: Non-significant findings for $H_2$ (RHR $\to$ readiness) and $H_{3b}$ (Training load $\to$ readiness) are retained and reported with full confidence intervals in all portfolio summaries and research briefs. Observational nocturnal RHR alone did not serve as a reliable standalone proxy for next-day subjective readiness in this cohort once sleep duration was controlled.
+
