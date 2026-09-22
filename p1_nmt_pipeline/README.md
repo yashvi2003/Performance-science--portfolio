@@ -198,12 +198,117 @@ All reliability calculations report single-measure reliability ($\text{ICC}(\cdo
 
 ---
 
-## Verification & Test Suite
-The pipeline is verified by **68 automated tests** spanning schemas, validators, analytical synthesizers, biomechanical phase detectors, real-data verification, and open-data reliability:
-- Fast unit, synthetic, real & open-data suite: `uv run pytest -v -m "not slow"` (67 passed in ~12s).
-- Open dataset suite: `uv run pytest tests/test_cmj_open.py` (11 passed). Verifies subject reconciliation, naming contracts, provenance retention, numerical reproduction, and reliability formulas.
-- Monte Carlo accuracy: `uv run pytest tests/test_cmj.py -m slow` ($N = 200$ trials across 9 conditions verifying 95th-percentile bounds for $h_{\text{imp}}$, $h_{\text{flt}}$, onset, takeoff, and landing).
-- Real data test suite: `uv run pytest tests/test_cmj_real.py` (8 passed).
-- AI transparency: All biomechanical equations and signal processing logic cross-checked against peer-reviewed literature (McMahon et al. 2018, Chavda et al. 2018, White et al. 2022). Results verified against known synthetic ground truths, independent Excel references, and Zenodo open research datasets.
+## Milestone M5a: Single-Trial Diagnostic Report (VALD Performance Style)
+
+A publication-grade diagnostic report figure was developed to provide high-density clinical and performance visualization for single CMJ trials, styled after industry-standard commercial force plate reporting (VALD ForceDecks):
+
+- **Banner Header**: Modern dark slate card (`#0F172A`) summarizing test modality, sampling frequency ($2000\text{ Hz}$), movement phase standard (McMahon et al., 2018), and automated trial validation status.
+- **Vertical Force-Time Curve**: Full-span primary axes with dual trace visualization ($30\text{ Hz}$ zero-phase low-pass filtered primary trace over subtle raw trace), annotated body weight baseline, discrete landmark markers (onset, unweighting trough, zero-velocity transition, peak propulsion, takeoff, landing impact, and landing peak), and subtle harmonious pastel phase shading:
+  - *Unweighting*: Movement onset $\to$ minimum force trough.
+  - *Braking (Eccentric)*: Minimum force trough $\to$ zero-velocity transition ($v(t)=0$).
+  - *Propulsion (Concentric)*: Zero-velocity transition $\to$ takeoff threshold crossing.
+  - *Flight*: Takeoff $\to$ initial ground impact.
+  - *Landing Impact*: Initial contact $\to$ landing impact peak.
+- **Center of Mass Velocity Profile**: Coupled sub-panel illustrating numerical trapezoidal COM velocity integration from standing quiet baseline through concentric acceleration to peak takeoff velocity ($v_{\text{to}}$), with exact ballistic flight trajectory projection ($v(t) = v_{\text{to}} - g(t - t_{\text{to}})$).
+- **Concentric Mechanical Power Output**: Coupled sub-panel displaying instantaneous mechanical power ($P(t) = F_{\text{filt}}(t) \cdot v(t)$), strictly isolated to ground contact propulsion prior to takeoff.
+- **Key Performance Metrics Summary Card**: Formatted VALD-style tabular card with alternating row fills reporting both primary impulse-momentum metrics and secondary flight metrics:
+  - Jump Height (Impulse-Momentum & Flight Time)
+  - Contraction Time & Flight Time
+  - RSImod (modified reactive strength index)
+  - Peak Relative Power ($\text{W/kg}$) & Absolute Mechanical Power ($\text{W}$)
+  - Peak Propulsion Force ($\text{N}$ & $\text{BW}$)
+  - Landing Peak Impact Force ($\text{N}$ & $\text{BW}$)
+  - Athlete Body Mass ($\text{kg}$ & $\text{N}$)
+- **Privacy & Anonymization Compliance**: Fully compliant with repository privacy guardrails; pulls directly from validated pipeline outputs without hardcoding athlete identifiers or exposing unapproved metadata.
+
+*Figure Reference*: [`reports/figures/cmj_single_trial_report.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_single_trial_report.png)
+
+*Regeneration Command*:
+```bash
+python scripts/generate_single_trial_report.py
+```
+
+---
+
+## Milestone M6a: Command-Line Interface (CLI)
+
+The pipeline provides an automated CLI entry point (`p1_nmt_pipeline.cli`) that processes individual trial CSV files or directories of trials and exports a schema-compliant `sessions.csv` strictly adhering to [`specs/00_shared_contract.md`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/specs/00_shared_contract.md).
+
+### CLI Usage & Options
+```bash
+# Process a directory of trial CSVs and export to sessions.csv
+python -m p1_nmt_pipeline.cli --input data/raw/cmj --output data/processed/sessions.csv
+
+# Process a single trial with explicit session date
+python -m p1_nmt_pipeline.cli --input data/raw/cmj/A01.csv --date 2026-09-22 --output data/processed/sessions.csv
+
+# Optional flags:
+#   --config PATH      Custom YAML pipeline configuration
+#   --no-anonymize     Preserve raw IDs instead of de-identifying to ATH_XX
+#   --verbose          Enable debug logging
+```
+
+### Shared Contract Compliance
+Every exported `sessions.csv` file is validated on export via `shared.contract.validate_sessions_df(strict=True)`:
+- Required schema fields: `session_id`, `date`, `athlete_id`, `test`, `trial`, `metric`, `value`, `unit`, `side`, `valid`, `flags`, `block`.
+- Metrics mapped directly to registered keys in `METRIC_REGISTRY`: `cmj_jump_height_imp`, `cmj_jump_height_flight`, `cmj_rsimod`, `cmj_peak_power`, `cmj_peak_power_rel`, `cmj_peak_velocity`, `cmj_peak_braking_force`, `cmj_time_to_takeoff`, `cmj_flight_time`, `cmj_body_mass`.
+- Anonymization guardrail: Defaults to automated de-identification mapping (`ATH_01`, `ATH_02`, etc.) to prevent accidental exposure of private identifiers.
+
+---
+
+## Reproducibility & Figure Generation
+
+All analyses, tables, and publication-grade figures in this module can be regenerated with single deterministic commands:
+
+```bash
+# 1. Run all fast unit, synthetic, real, and open-data tests
+pytest -v -m "not slow"
+
+# 2. Run Monte Carlo validation (N=200 per condition, 9 conditions)
+pytest tests/test_cmj.py -m slow
+
+# 3. Generate VALD-style single-trial diagnostic report
+python scripts/generate_single_trial_report.py
+
+# 4. Generate open-data validation and reliability figures (White et al.)
+python p1_nmt_pipeline/open_data_reliability.py
+
+# 5. Process trials and export contract-compliant sessions.csv
+python -m p1_nmt_pipeline.cli --input data/raw/cmj --output data/processed/sessions.csv
+```
+
+---
+
+## Limitations & Scientific Guardrails
+
+1. **Single-Trial Athlete Cohort (Professor Data)**: The primary 10-athlete dataset contains exactly one trial per athlete ($n=10$). Within-athlete longitudinal trends or trial-to-trial reliability ($\text{CV}$, $\text{ICC}$, $\text{SEM}$, $\text{MDC}$) cannot be determined from this cohort. Repeated-trial reliability was evaluated separately using open research data (White et al., $n=67$, $663$ trials).
+2. **Pre-Trimmed Open Signals**: The White et al. dataset provides vertical GRF pre-trimmed to takeoff at $1000\text{ Hz}$. Consequently, airborne flight-time metrics and landing impact attenuation cannot be validated on that open dataset.
+3. **Sensor Tare Drift vs. Landing Kinematics**: Sensor zero-offset drift ($\sim 3\text{--}6\text{ N}$) introduces a small systematic downward bias on impulse-momentum jump height ($\approx -3.8\text{ mm}$), but does not correlate with $(h_{\text{imp}} - h_{\text{flt}})$ differences ($r = 0.062$) because between-athlete variation in landing ankle/knee flexion dominates airborne flight duration.
+4. **Synthetic Data Disclaimer**: Synthetic data generated by `shared/synth.py` is used solely to verify pipeline numerical correctness, edge-case handling, and algorithmic bounds against known closed-form mathematical solutions. **Synthetic data is not a research finding.** All figures utilizing synthetic data are explicitly labelled with "synthetic".
+
+---
+
+## AI-Use Transparency & Verification
+
+In accordance with portfolio research conventions:
+- **AI Application**: Large language model agents (Google Antigravity) were utilized for rapid scaffolding of modular pipeline components, unit test authoring, CLI argument parsing, Matplotlib grid layout design, and running regression checks.
+- **Verification of Mathematical & Biomechanical Formulas**:
+  - All mathematical equations (trapezoidal impulse integration, McMahon phase definitions, Somigliana normal gravity formula, Shrout & Fleiss $\text{ICC}(2, 1)$ / $\text{ICC}(3, 1)$, Weir $\text{SEM}$ and $\text{MDC}_{95}$) were independently checked against peer-reviewed literature.
+  - Closed-form synthetic ground truths verified numerical integration precision across varying sampling rates ($250\text{--}2000\text{ Hz}$).
+  - Open data outputs were benchmarked against published research findings (White et al., 2022) across all 663 trials ($r = 1.000000$).
+  - Code review was conducted on all filter routines (zero-phase Butterworth `sosfiltfilt`), event boundary detections, and schema validators.
+
+---
+
+## Test Suite Summary
+
+The pipeline is verified by **73 automated tests** (72 fast tests in $\sim 20\text{s}$, 1 slow Monte Carlo test):
+- `tests/test_p1_pipeline.py`: Config defaults, filter attenuation, zero-phase alignment, body mass estimation, timestamp resampling, quiet-window QA, CLI execution, contract compliance, and single-trial report generation (13 tests).
+- `tests/test_cmj.py`: Phase ordering, impulse consistency, landing impact scaling, flight offset corrections, sub-sample extrapolation, and Monte Carlo tolerance envelopes (21 tests).
+- `tests/test_cmj_real.py`: Real-data parsing, golden test comparison, timestamp irregularity handling, and privacy guardrails (8 tests).
+- `tests/test_cmj_open.py`: White et al. cohort reconciliation, naming contract, golden reproduction, balanced matrix reliability, and terminal force sensitivity (13 tests).
+- `tests/test_contract.py`: Registry integrity, `sessions.csv` and `wearable_daily.csv` schema validation (8 tests).
+- `tests/test_synth.py`: Analytical ground-truth verification across CMJ, SJ, DJ, IMTP, bilateral asymmetry, and synthetic contract generators (10 tests).
+
 
 

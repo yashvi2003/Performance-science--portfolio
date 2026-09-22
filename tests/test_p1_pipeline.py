@@ -1,6 +1,7 @@
 """Unit tests for Project 1 Milestone M1a: Config, Validator, and Filter."""
 import numpy as np
 import pandas as pd
+from pathlib import Path
 import pytest
 
 from p1_nmt_pipeline.config import PipelineConfig
@@ -131,3 +132,63 @@ def test_validator_quiet_window_qa_flags():
     df_noisy = pd.DataFrame({"time": t, "force": f_noisy})
     val_noisy = load_and_validate_trial(df_noisy, body_mass_kg=70.0)
     assert any("quiet_window_noisy_sd" in flag for flag in val_noisy.qa_flags)
+
+
+def test_cli_execution_and_contract_validation(tmp_path):
+    """Verify CLI processes directory of trials and writes valid sessions.csv."""
+    from p1_nmt_pipeline.cli import run_cli
+    from shared.contract import validate_sessions_df
+
+    raw_dir = Path("data/raw/cmj")
+    if not raw_dir.exists():
+        pytest.skip("data/raw/cmj not found")
+
+    out_csv = tmp_path / "test_sessions.csv"
+    ret = run_cli(["--input", str(raw_dir), "--output", str(out_csv), "--date", "2026-09-22"])
+    assert ret == 0
+    assert out_csv.exists()
+
+    df = pd.read_csv(out_csv)
+    assert len(df) > 0
+    # Strict contract validation
+    is_valid, errors = validate_sessions_df(df, strict=True)
+    assert is_valid, f"Contract validation failed: {errors}"
+
+    # Anonymization guardrail: verify athlete_id format ATH_XX
+    assert all(aid.startswith("ATH_") for aid in df["athlete_id"].unique())
+    # Confirm no private internal IDs in public sessions output
+    assert not any("A01" in aid for aid in df["athlete_id"].unique())
+
+
+def test_cli_single_file_execution(tmp_path):
+    """Verify CLI processes single trial CSV and writes valid sessions.csv."""
+    from p1_nmt_pipeline.cli import run_cli
+    from shared.contract import validate_sessions_df
+
+    single_file = Path("data/raw/cmj/A01.csv")
+    if not single_file.exists():
+        pytest.skip("data/raw/cmj/A01.csv not found")
+
+    out_csv = tmp_path / "single_sessions.csv"
+    ret = run_cli(["--input", str(single_file), "--output", str(out_csv)])
+    assert ret == 0
+    assert out_csv.exists()
+
+    df = pd.read_csv(out_csv)
+    assert len(df) == 10  # 10 CMJ metrics
+    is_valid, errors = validate_sessions_df(df, strict=True)
+    assert is_valid, f"Contract validation failed: {errors}"
+
+
+def test_single_trial_report_generation():
+    """Verify VALD-style single-trial report generator runs and produces output file."""
+    from scripts.generate_single_trial_report import generate_single_trial_report
+
+    raw_dir = Path("data/raw/cmj")
+    if not raw_dir.exists():
+        pytest.skip("data/raw/cmj not found")
+
+    out_fig = generate_single_trial_report()
+    assert out_fig.exists()
+    assert out_fig.stat().st_size > 50000  # Non-trivial image file
+
