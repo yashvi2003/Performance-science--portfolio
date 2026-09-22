@@ -81,12 +81,12 @@ class CMJEvents:
         Timestamp of peak propulsion force (s).
     propulsion_peak_force_n : float
         Peak propulsion force magnitude (N).
-    takeoff_idx : int
-        Sample index of takeoff.
+    takeoff_idx : int | None
+        Sample index of takeoff, or None if takeoff detection failed.
         Criterion: First sample after propulsion peak where force drops below F_thresh
         for N consecutive samples.
-    takeoff_time_s : float
-        Timestamp of takeoff (s).
+    takeoff_time_s : float | None
+        Timestamp of takeoff (s), or None if takeoff detection failed.
     landing_idx : int | None
         Sample index of landing impact, or None if no landing occurred.
         Criterion: First sample after takeoff where force rises above F_thresh
@@ -132,8 +132,8 @@ class CMJEvents:
     propulsion_peak_idx: int
     propulsion_peak_time_s: float
     propulsion_peak_force_n: float
-    takeoff_idx: int
-    takeoff_time_s: float
+    takeoff_idx: int | None
+    takeoff_time_s: float | None
     landing_idx: int | None
     landing_time_s: float | None
     flight_time_s: float | None
@@ -281,33 +281,42 @@ def detect_cmj_events(
     if n_samples < 50:
         raise ValueError(f"Insufficient samples for CMJ analysis: {n_samples}")
 
-    # 1. Baseline Quiet Standing Assessment
+    # 1. Adaptive Baseline Quiet Standing Assessment
     q_start_s = thresh.quiet_start_s if thresh.quiet_start_s < (thresh.quiet_window_s * 0.5) else 0.0
-    quiet_mask = (time_s >= (time_s[0] + q_start_s)) & (time_s <= (time_s[0] + thresh.quiet_window_s))
-    if not np.any(quiet_mask):
-        quiet_indices = np.arange(0, min(n_samples, max(10, int(fs_hz * thresh.quiet_window_s))))
-    else:
-        quiet_indices = np.where(quiet_mask)[0]
+    from p1_nmt_pipeline.validator import find_adaptive_quiet_window
 
-    q_start_idx = int(quiet_indices[0])
-    q_end_idx = int(quiet_indices[-1])
+    (
+        q_start_idx,
+        q_end_idx,
+        quiet_bw,
+        quiet_sd,
+        trend_slope,
+        quiet_duration_s,
+    ) = find_adaptive_quiet_window(
+        time_arr=time_s,
+        force_arr=force_n,
+        fs_hz=fs_hz,
+        quiet_start_s=q_start_s,
+        max_quiet_window_s=thresh.quiet_window_s,
+        max_quiet_sd_n=thresh.max_quiet_sd_n,
+        max_quiet_trend_n_per_s=thresh.max_quiet_trend_n_per_s,
+    )
 
-    quiet_forces = force_n[q_start_idx : q_end_idx + 1]
-    quiet_bw = float(np.mean(quiet_forces))
-    quiet_sd = float(np.std(quiet_forces))
+    # Flag trials with under 0.5 s of quiet
+    if quiet_duration_s < 0.50 - 1e-3:
+        qa_warnings.append(f"quiet_window_short_{quiet_duration_s:.2f}s")
+        qa_warnings.append("quiet_window_under_0.5s")
+        logger.warning(
+            "Quiet standing window is under 0.5 s (duration = %.2f s < 0.50 s)",
+            quiet_duration_s,
+        )
 
-    # Quiet window stability QA check
+    # Quiet window stability QA checks
     if quiet_sd > thresh.max_quiet_sd_n:
         qa_warnings.append(f"quiet_window_noisy_sd_{quiet_sd:.1f}N")
 
-    # Linear trend in quiet window
-    q_times = time_s[q_start_idx : q_end_idx + 1]
-    t_demean = q_times - np.mean(q_times)
-    var_t = float(np.sum(t_demean**2))
-    if var_t > 0:
-        trend_slope = float(np.sum(t_demean * (quiet_forces - quiet_bw)) / var_t)
-        if abs(trend_slope) > thresh.max_quiet_trend_n_per_s:
-            qa_warnings.append(f"quiet_window_drifting_trend_{trend_slope:.1f}N_s")
+    if abs(trend_slope) > thresh.max_quiet_trend_n_per_s:
+        qa_warnings.append(f"quiet_window_drifting_trend_{trend_slope:.1f}N_s")
 
     if body_mass_kg is None or body_mass_kg <= 0.0:
         body_mass = quiet_bw / STANDARD_G
@@ -426,8 +435,8 @@ def detect_cmj_events(
     unweight_min_time = float(time_s[unweight_min_idx])
 
     # Search backward from unweighting minimum to find movement onset
-    onset_idx = q_end_idx
-    for k in range(unweight_min_idx, q_end_idx - 1, -1):
+    onset_idx = q_start_idx
+    for k in range(unweight_min_idx, q_start_idx - 1, -1):
         if working_force[k] >= onset_thresh_low:
             onset_idx = k
             break
@@ -503,20 +512,49 @@ def detect_cmj_events(
             break
 
     if takeoff_idx is None:
-        takeoff_idx = prop_peak_idx + int(np.argmin(working_force[prop_peak_idx:]))
-        qa_warnings.append("takeoff_detection_fallback_to_minimum")
+        qa_warnings.append("takeoff_detection_failed")
+        takeoff_time = None
+        landing_idx = None
+        landing_time = None
+        flight_time = None
+    else:
+        takeoff_time = float(time_s[takeoff_idx])
+        if thresh.subsample_takeoff and takeoff_idx > 1:
+            F_floor = flight_offset_n
+            f_curr = float(detect_force[takeoff_idx])
+            t_curr = float(time_s[takeoff_idx])
+            t_prev = float(time_s[takeoff_idx - 1])
+            dt = t_curr - t_prev
+            if f_curr <= F_floor:
+                f_prev = float(detect_force[takeoff_idx - 1])
+                f_prev2 = float(detect_force[takeoff_idx - 2])
+                dF_dt = (f_prev - f_prev2) / dt if dt > 0 else -1.0
+                if dF_dt < 0:
+                    dt_tail = (F_floor - f_prev) / dF_dt
+                    dt_tail = max(0.0, min(dt_tail, dt))
+                    takeoff_time = t_prev + dt_tail
+            else:
+                f_prev = float(detect_force[takeoff_idx - 1])
+                dF_dt = (f_curr - f_prev) / dt if dt > 0 else -1.0
+                if dF_dt < 0:
+                    dt_tail = (F_floor - f_curr) / dF_dt
+                    dt_tail = max(0.0, min(dt_tail, dt))
+                    takeoff_time = t_curr + dt_tail
 
-    takeoff_time = float(time_s[takeoff_idx])
+        # 10. Definitive Landing Detection (after takeoff and minimum flight duration)
+        landing_idx = None
+        for j in range(takeoff_idx + min_flight_samples, n_samples - land_consec):
+            if np.all(detect_force[j : j + land_consec] >= land_thresh):
+                landing_idx = j
+                break
 
-    # 10. Definitive Landing Detection (after takeoff and minimum flight duration)
-    landing_idx = None
-    for j in range(takeoff_idx + min_flight_samples, n_samples - land_consec):
-        if np.all(detect_force[j : j + land_consec] >= land_thresh):
-            landing_idx = j
-            break
-
-    landing_time = float(time_s[landing_idx]) if landing_idx is not None else None
-    flight_time = (landing_time - takeoff_time) if landing_time is not None else None
+        if landing_idx is None:
+            qa_warnings.append("landing_detection_failed")
+            landing_time = None
+            flight_time = None
+        else:
+            landing_time = float(time_s[landing_idx])
+            flight_time = (landing_time - takeoff_time)
 
     # 11. Landing Peak Force (strictly AFTER landing)
     landing_peak_idx = None

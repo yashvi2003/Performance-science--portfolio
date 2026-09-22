@@ -204,9 +204,43 @@ def compute_cmj_metrics(
     for i in range(events.int_start_idx, n_samples - 1):
         vel[i + 1] = vel[i] + 0.5 * (accel[i] + accel[i + 1]) * dt_arr[i]
 
+    # Handle Takeoff Detection Failure
+    if events.takeoff_idx is None or events.takeoff_time_s is None:
+        braking_forces = corr_force[events.unweighting_min_idx : events.v0_idx + 1]
+        peak_braking_force = float(np.max(braking_forces)) if len(braking_forces) > 0 else bw
+        return CMJMetrics(
+            jump_height_impulse_m=float("nan"),
+            jump_height_flight_m=float("nan"),
+            jump_height_primary_m=float("nan"),
+            rsimod_impulse=float("nan"),
+            rsimod_flight=float("nan"),
+            contraction_time_s=float("nan"),
+            flight_time_s=float("nan"),
+            peak_velocity_m_per_s=float("nan"),
+            peak_power_w=float("nan"),
+            peak_relative_power_w_per_kg=float("nan"),
+            peak_propulsion_force_n=float("nan"),
+            peak_braking_force_n=round(peak_braking_force, 2),
+            peak_landing_force_n=float("nan"),
+            body_weight_n=round(bw, 2),
+            body_mass_kg=round(mass, 2),
+            detected_onset_time_s=round(events.onset_time_s, 4),
+            integration_start_time_s=round(events.int_start_time_s, 4),
+            takeoff_time_s=float("nan"),
+            landing_time_s=float("nan"),
+            flight_offset_n=round(events.flight_offset_n, 3),
+            flight_offset_applied=events.flight_offset_applied,
+            flight_offset_model=events.flight_offset_model,
+        )
+
     # 3. Takeoff Velocity
     # v_takeoff = v(t_takeoff)
     v_to = float(vel[events.takeoff_idx])
+    if config.thresholds.subsample_takeoff and events.takeoff_idx > 0 and events.takeoff_time_s is not None:
+        dt_offset = float(events.takeoff_time_s) - float(time_s[events.takeoff_idx])
+        a_floor = (events.flight_offset_n - bw) / mass
+        v_to = float(v_to + a_floor * dt_offset)
+
 
     # 4. Jump Height by Impulse-Momentum Theorem (Primary)
     # h_impulse = v_takeoff^2 / (2 * g)
@@ -218,9 +252,9 @@ def compute_cmj_metrics(
     # 5. Jump Height by Flight Time (Secondary)
     # t_flight = t_landing - t_takeoff
     # h_flight = (g * t_flight^2) / 8
-    h_flight = None
+    h_flight = float("nan")
     flight_time = events.flight_time_s
-    if flight_time is not None and flight_time > 0.0:
+    if events.landing_idx is not None and flight_time is not None and flight_time > 0.0:
         h_flight = float((STANDARD_G * (flight_time**2)) / 8.0)
 
     # 6. Contraction Time
@@ -234,7 +268,7 @@ def compute_cmj_metrics(
     # RSImod_impulse = h_impulse / t_contraction
     # RSImod_flight = h_flight / t_contraction
     rsimod_impulse = float(h_impulse / contraction_time)
-    rsimod_flight = float(h_flight / contraction_time) if h_flight is not None else None
+    rsimod_flight = float(h_flight / contraction_time) if not np.isnan(h_flight) else float("nan")
 
     # 8. Instantaneous Power
     # P(t) = F_z(t) * v(t)
@@ -263,29 +297,30 @@ def compute_cmj_metrics(
 
     # 13. Isolated Peak Landing Force
     # F_peak_landing = max_{t >= t_landing} F_z(t)
-    peak_landing_force = events.landing_peak_force_n
+    peak_landing_force = events.landing_peak_force_n if events.landing_idx is not None else float("nan")
 
     return CMJMetrics(
         jump_height_impulse_m=round(h_impulse, 4),
-        jump_height_flight_m=round(h_flight, 4) if h_flight is not None else None,
+        jump_height_flight_m=round(h_flight, 4) if not np.isnan(h_flight) else float("nan"),
         jump_height_primary_m=round(h_impulse, 4),
         rsimod_impulse=round(rsimod_impulse, 4),
-        rsimod_flight=round(rsimod_flight, 4) if rsimod_flight is not None else None,
+        rsimod_flight=round(rsimod_flight, 4) if not np.isnan(rsimod_flight) else float("nan"),
         contraction_time_s=round(contraction_time, 4),
-        flight_time_s=round(flight_time, 4) if flight_time is not None else None,
+        flight_time_s=round(flight_time, 4) if flight_time is not None and not np.isnan(flight_time) else float("nan"),
         peak_velocity_m_per_s=round(peak_vel, 4),
         peak_power_w=round(peak_power, 2),
         peak_relative_power_w_per_kg=round(peak_rel_power, 2),
         peak_propulsion_force_n=round(peak_prop_force, 2),
         peak_braking_force_n=round(peak_braking_force, 2),
-        peak_landing_force_n=round(peak_landing_force, 2) if peak_landing_force is not None else None,
+        peak_landing_force_n=round(peak_landing_force, 2) if peak_landing_force is not None and not np.isnan(peak_landing_force) else float("nan"),
         body_weight_n=round(bw, 2),
         body_mass_kg=round(mass, 2),
         detected_onset_time_s=round(events.onset_time_s, 4),
         integration_start_time_s=round(events.int_start_time_s, 4),
-        takeoff_time_s=round(events.takeoff_time_s, 4),
-        landing_time_s=round(events.landing_time_s, 4) if events.landing_time_s is not None else None,
+        takeoff_time_s=round(events.takeoff_time_s, 4) if events.takeoff_time_s is not None else float("nan"),
+        landing_time_s=round(events.landing_time_s, 4) if events.landing_time_s is not None else float("nan"),
         flight_offset_n=round(events.flight_offset_n, 3),
         flight_offset_applied=events.flight_offset_applied,
         flight_offset_model=events.flight_offset_model,
     )
+

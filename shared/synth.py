@@ -168,6 +168,18 @@ def _build_cmj_acceleration(
                     acc[i] = base_acc + 0.20 * A_prop * np.sin(2.0 * np.pi * tau2)
                 else:
                     acc[i] = base_acc
+            elif template in ("double_peak_late", "double_peak_stress"):
+                # Original late-propulsion double-peak stress template:
+                # Secondary push in the second half of propulsion (tau > 0.5)
+                # Note: although integrating to zero over tau in [0.5, 1.0],
+                # the negative perturbation near tau=1.0 accelerates the force drop,
+                # triggering takeoff threshold detection ~0.7 ms early and omitting
+                # ~2.7 mm of negative impulse tail. Documented as a stress test.
+                if tau > 0.5:
+                    tau2 = (tau - 0.5) / 0.5
+                    acc[i] = base_acc + 0.15 * A_prop * np.sin(2.0 * np.pi * tau2)
+                else:
+                    acc[i] = base_acc
             else:
                 acc[i] = base_acc
         elif t < t_landing:
@@ -189,7 +201,7 @@ def _build_cmj_acceleration(
 # CMJ generator
 # ---------------------------------------------------------------------------
 
-CMJTemplate = Literal["single_peak", "double_peak", "deep_unweight", "high_braking"]
+CMJTemplate = Literal["single_peak", "double_peak", "double_peak_late", "deep_unweight", "high_braking"]
 
 
 def make_cmj_trial(
@@ -410,6 +422,8 @@ def make_cmj_trial(
         "t_takeoff_s": float(t_takeoff),
         "t_landing_s": float(t_landing),
         "t_flight_s": float(t_flight_analytical),
+        "flight_time_s": float(t_flight_analytical),
+        "v_impact_analytical_m_s": float(v_impact),
         "contraction_time_s": float(t_contraction),
         "rsimod": float(rsimod_analytical),
         "body_mass_kg": float(body_mass_kg),

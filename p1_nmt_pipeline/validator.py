@@ -1,3 +1,4 @@
+
 """Input validation, column normalization, and metadata extraction for force-plate trials.
 
 Governed by specs/01_neuromuscular_pipeline.md and PLAN.md.
@@ -36,6 +37,102 @@ class ValidatedTrialData:
     @property
     def flags_str(self) -> str:
         return ";".join(self.qa_flags)
+
+
+def find_adaptive_quiet_window(
+    time_arr: np.ndarray,
+    force_arr: np.ndarray,
+    fs_hz: float,
+    quiet_start_s: float = 0.05,
+    max_quiet_window_s: float = 0.50,
+    min_quiet_window_s: float = 0.15,
+    max_quiet_sd_n: float = 15.0,
+    max_quiet_trend_n_per_s: float = 20.0,
+) -> tuple[int, int, float, float, float, float]:
+    """Find the most stable initial quiet standing segment adaptively.
+
+    Detects the quiet baseline segment by analyzing standard deviation and linear trend
+    (slope). If movement onset or unweighting begins before `max_quiet_window_s`
+    (e.g., trials with short lead-in < 0.5 s), the window adapts to end before the
+    dip so baseline mass and quiet SD are not contaminated.
+
+    Parameters
+    ----------
+    time_arr : np.ndarray
+        Array of timestamps (s).
+    force_arr : np.ndarray
+        Vertical force array (N).
+    fs_hz : float
+        Sampling rate in Hz.
+    quiet_start_s : float
+        Initial settling period to skip (default 0.05 s).
+    max_quiet_window_s : float
+        Target maximum quiet window duration (default 0.50 s).
+    min_quiet_window_s : float
+        Minimum window duration required for baseline statistics (default 0.15 s).
+    max_quiet_sd_n : float
+        Maximum acceptable SD before flagging instability (default 15.0 N).
+    max_quiet_trend_n_per_s : float
+        Maximum acceptable slope before flagging drift (default 20.0 N/s).
+
+    Returns
+    -------
+    tuple[int, int, float, float, float, float]
+        (start_idx, end_idx, mean_force, std_force, slope, duration_s)
+    """
+    actual_quiet_start_s = quiet_start_s if quiet_start_s < (max_quiet_window_s * 0.5) else 0.0
+    t_start = time_arr[0] + actual_quiet_start_s
+    i_start = int(np.searchsorted(time_arr, t_start))
+
+    n_pts = len(time_arr)
+    if n_pts - i_start < 2:
+        raise ValueError(f"Insufficient samples for quiet window analysis: {n_pts}")
+
+    avail = n_pts - i_start
+    min_samples = max(2, min(int(round(fs_hz * min_quiet_window_s)), avail - 1))
+    target_end_s = time_arr[0] + max_quiet_window_s
+    target_end_idx = min(n_pts - 1, int(np.searchsorted(time_arr, target_end_s)))
+    if target_end_idx <= i_start + min_samples:
+        target_end_idx = min(n_pts - 1, i_start + min_samples)
+
+    if target_end_idx - i_start <= min_samples:
+        best_end = target_end_idx
+    else:
+        # Seed statistics from the initial segment
+        seed_f = force_arr[i_start : i_start + min_samples]
+        seed_mean = float(np.mean(seed_f))
+        seed_sd = float(np.std(seed_f))
+        best_end = i_start + min_samples
+        step = max(1, int(round(fs_hz * 0.005)))  # 5 ms evaluation step
+
+        for i_cand in range(i_start + min_samples, target_end_idx + 1, step):
+            sub_f = force_arr[i_start:i_cand]
+            sub_t = time_arr[i_start:i_cand]
+            cur_sd = float(np.std(sub_f))
+            dt = sub_t - np.mean(sub_t)
+            var_t = float(np.sum(dt**2))
+            cur_slope = float(np.sum(dt * (sub_f - np.mean(sub_f))) / var_t) if var_t > 0 else 0.0
+
+            # Local deviation in recent 30 ms window
+            recent_win = max(2, int(round(fs_hz * 0.030)))
+            recent_f = force_arr[max(i_start, i_cand - recent_win) : i_cand]
+            recent_dev = abs(float(np.mean(recent_f)) - seed_mean)
+
+            # Check if entering movement unweighting or excessive drift
+            if recent_dev > max(4.0 * seed_sd, 12.0) or (cur_sd > max_quiet_sd_n and cur_sd > seed_sd * 1.8) or abs(cur_slope) > max_quiet_trend_n_per_s:
+                break
+            best_end = i_cand
+
+    quiet_times = time_arr[i_start : best_end + 1]
+    quiet_forces = force_arr[i_start : best_end + 1]
+    mean_quiet_force = float(np.mean(quiet_forces))
+    std_quiet_force = float(np.std(quiet_forces))
+    dt_quiet = quiet_times - np.mean(quiet_times)
+    var_t = float(np.sum(dt_quiet**2))
+    quiet_slope = float(np.sum(dt_quiet * (quiet_forces - mean_quiet_force)) / var_t) if var_t > 0 else 0.0
+    quiet_duration_s = float(time_arr[best_end] - time_arr[0])
+
+    return i_start, best_end, mean_quiet_force, std_quiet_force, quiet_slope, quiet_duration_s
 
 
 def load_and_validate_trial(
@@ -195,27 +292,30 @@ def load_and_validate_trial(
             qa_flags.append("bilateral_sum_mismatch")
             logger.warning("Left + Right force does not match total force (max diff %.2f N)", np.max(bilateral_diff))
 
-    # 8. Quiet Window Quality Assessment (SD and Drift Trend)
-    actual_quiet_start_s = quiet_start_s if quiet_start_s < (quiet_window_s * 0.5) else 0.0
-    quiet_mask = (time_arr >= (time_arr[0] + actual_quiet_start_s)) & (
-        time_arr <= (time_arr[0] + quiet_window_s)
+    # 8. Adaptive Quiet Window Quality Assessment (SD and Drift Trend)
+    (
+        i_quiet_start,
+        i_quiet_end,
+        mean_quiet_force,
+        std_quiet_force,
+        quiet_slope,
+        quiet_duration_s,
+    ) = find_adaptive_quiet_window(
+        time_arr=time_arr,
+        force_arr=force_arr,
+        fs_hz=fs_hz,
+        quiet_start_s=quiet_start_s,
+        max_quiet_window_s=quiet_window_s,
     )
-    if not np.any(quiet_mask):
-        raise ValueError(
-            f"Quiet window [{actual_quiet_start_s}, {quiet_window_s}] s contains no samples."
-        )
-    quiet_times = time_arr[quiet_mask]
-    quiet_forces = force_arr[quiet_mask]
-    mean_quiet_force = float(np.mean(quiet_forces))
-    std_quiet_force = float(np.std(quiet_forces))
 
-    # Linear regression trend (slope) in quiet window: slope = Cov(t, F) / Var(t)
-    dt_quiet = quiet_times - np.mean(quiet_times)
-    var_t = float(np.sum(dt_quiet**2))
-    if var_t > 0:
-        quiet_slope = float(np.sum(dt_quiet * (quiet_forces - mean_quiet_force)) / var_t)
-    else:
-        quiet_slope = 0.0
+    # Flag trials with under 0.5 s of quiet
+    if quiet_duration_s < 0.50 - 1e-3:
+        qa_flags.append(f"quiet_window_short_{quiet_duration_s:.2f}s")
+        qa_flags.append("quiet_window_under_0.5s")
+        logger.warning(
+            "Quiet standing window is under 0.5 s (duration = %.2f s < 0.50 s)",
+            quiet_duration_s,
+        )
 
     # QA checks on quiet window stability
     if std_quiet_force > 15.0:  # > 15 N standard deviation
