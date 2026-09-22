@@ -137,10 +137,73 @@ We systematically evaluated the stability of $h_{\text{imp}}$, $\text{RSImod}$, 
 
 ---
 
+---
+
+## Milestone M2g: Open Data Validation & Within-Participant Reliability
+
+### Scientific Scope & Dataset Specification
+While Milestones M2c–M2f addressed data quality, golden validation, and sensitivity on a between-athlete sample ($n=10$, 1 trial each), Milestone M2g evaluates **within-participant repeated-trial reliability** using an open dataset:
+- **Source**: White et al. (2022, *PLOS ONE*, DOI: [10.1371/journal.pone.0263846](https://doi.org/10.1371/journal.pone.0263846); Zenodo DOI: [10.5281/zenodo.19136480](https://doi.org/10.5281/zenodo.19136480), CC BY 4.0).
+- **Cohort Reconciliation**: 663 CMJ trials across **67 unique participants** (`subject_ids` 0..68 with indices 14 and 29 omitted due to missing synchronized accelerometer data). The scalar metadata key `n_subjects=69` reflects the parent study recruitment cohort, not the row count of `cmj_dataset_both.npz`.
+- **Condition Split**: 334 trials without arm swing (**CMJNA**, Condition 1) and 329 trials with arm swing (**CMJA**, Condition 2). Conditions are evaluated in strictly separate models.
+- **Physical Characteristics**: 1000 Hz dual Kistler force platforms, body-weight normalized vertical GRF, pre-trimmed to terminate at takeoff.
+
+---
+
+### Jump-Height Definition Contract & Naming Scheme
+To avoid ambiguous aliasing between flight trajectory height and total center of mass excursion:
+1. `jump_height_takeoff_vel_m`: Flight-trajectory height of COM above takeoff position:
+   $$h_{\text{to}} = \frac{v_{\text{takeoff}}^2}{2g} \approx 31.8\text{ cm}$$
+2. `s_takeoff_m`: COM elevation at toe-off relative to standing quiet baseline:
+   $$s_{\text{to}} = \iint_0^{t_{\text{to}}} a(\tau)\,d\tau^2 \approx 12.5\text{ cm}$$
+3. `jump_height_total_com_m`: Total apex COM elevation relative to standing quiet baseline:
+   $$h_{\text{total\_com}} = s_{\text{to}} + \frac{v_{\text{takeoff}}^2}{2g} \approx 44.2\text{ cm}$$
+4. `ref_jump_height_m`: The author's reference jump height, verified to equal $h_{\text{total\_com}}$ ($r = 1.000000$).
+
+---
+
+### Golden Reproduction Results (All 663 Trials)
+
+| Metric | Reference Mean | Calculated Mean | Mean Difference | Mean % Error | Pearson $r$ | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Peak Power (W/kg)** | $48.69\text{ W/kg}$ | $48.64\text{ W/kg}$ | $-0.053\text{ W/kg}$ | $-0.109\%$ | **$1.000000$** | **PASS** |
+| **Total COM Jump Height (cm)** | $44.16\text{ cm}$ | $44.26\text{ cm}$ | $+0.101\text{ cm}$ | $+0.235\%$ | **$1.000000$** | **PASS** |
+
+*Note on Physical Constants*: The pipeline strictly maintains $g = 9.80665\text{ m/s}^2$. The constant $-0.109\%$ power offset and $+1.0\text{ mm}$ height offset stem from the reference data's use of $g = 9.80\text{ m/s}^2$.
+
+---
+
+### Pre-Registered Reliability Results (With Raw Denominators)
+
+All reliability calculations report single-measure reliability ($\text{ICC}(\cdot, 1)$), which represents the precision of evaluating an individual jump:
+
+| Condition & Trial Set | Metric | Mean $\pm$ SD | Within-Subject $\text{CV}\%$ | $\text{ICC}(2, 1)$ [95% CI] | $\text{ICC}(3, 1)$ [95% CI] | $\text{SEM}$ | $\text{MDC}_{95}$ |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CMJNA 4-Trial Set**<br>($n=66\text{ subjs} \times 4\text{ trials} = 264\text{ obs}$) | Total COM Height<br>Takeoff-Vel Height<br>Peak Power<br>Takeoff Velocity | $39.96 \pm 8.31\text{ cm}$<br>$29.40 \pm 7.64\text{ cm}$<br>$45.47 \pm 7.30\text{ W/kg}$<br>$2.38 \pm 0.32\text{ m/s}$ | $4.92 \pm 4.14\%$<br>$5.00 \pm 4.02\%$<br>$3.27 \pm 2.65\%$<br>$2.51 \pm 2.02\%$ | **$0.9060$** [$0.867, 0.937$]<br>**$0.9443$** [$0.920, 0.963$]<br>**$0.9308$** [$0.901, 0.954$]<br>**$0.9448$** [$0.921, 0.963$] | **$0.9052$** [$0.866, 0.936$]<br>**$0.9439$** [$0.920, 0.963$]<br>**$0.9317$** [$0.903, 0.954$]<br>**$0.9447$** [$0.921, 0.963$] | $2.55\text{ cm}$<br>$1.80\text{ cm}$<br>$1.92\text{ W/kg}$<br>$0.07\text{ m/s}$ | $7.07\text{ cm}$<br>$5.00\text{ cm}$<br>$5.33\text{ W/kg}$<br>$0.21\text{ m/s}$ |
+| **CMJNA 3-Trial Set**<br>($n=67\text{ subjs} \times 3\text{ trials} = 201\text{ obs}$) | Total COM Height<br>Takeoff-Vel Height<br>Peak Power<br>Takeoff Velocity | $39.80 \pm 8.47\text{ cm}$<br>$29.21 \pm 7.83\text{ cm}$<br>$45.42 \pm 7.57\text{ W/kg}$<br>$2.37 \pm 0.33\text{ m/s}$ | $4.62 \pm 3.07\%$<br>$4.69 \pm 3.06\%$<br>$2.72 \pm 1.63\%$<br>$2.35 \pm 1.53\%$ | **$0.9356$** [$0.906, 0.958$]<br>**$0.9606$** [$0.942, 0.974$]<br>**$0.9656$** [$0.949, 0.978$]<br>**$0.9622$** [$0.944, 0.975$] | **$0.9348$** [$0.904, 0.957$]<br>**$0.9601$** [$0.941, 0.974$]<br>**$0.9665$** [$0.950, 0.978$]<br>**$0.9618$** [$0.943, 0.975$] | $2.15\text{ cm}$<br>$1.55\text{ cm}$<br>$1.40\text{ W/kg}$<br>$0.06\text{ m/s}$ | $5.96\text{ cm}$<br>$4.31\text{ cm}$<br>$3.89\text{ W/kg}$<br>$0.18\text{ m/s}$ |
+| **CMJA 4-Trial Set**<br>($n=64\text{ subjs} \times 4\text{ trials} = 256\text{ obs}$) | Total COM Height<br>Takeoff-Vel Height<br>Peak Power<br>Takeoff Velocity | $47.33 \pm 10.32\text{ cm}$<br>$33.54 \pm 8.91\text{ cm}$<br>$51.42 \pm 8.96\text{ W/kg}$<br>$2.54 \pm 0.35\text{ m/s}$ | $5.17 \pm 4.60\%$<br>$5.42 \pm 4.41\%$<br>$4.40 \pm 3.36\%$<br>$2.75 \pm 2.33\%$ | **$0.9128$** [$0.876, 0.942$]<br>**$0.9395$** [$0.913, 0.960$]<br>**$0.8945$** [$0.850, 0.929$]<br>**$0.9370$** [$0.909, 0.958$] | **$0.9149$** [$0.879, 0.943$]<br>**$0.9412$** [$0.915, 0.961$]<br>**$0.8966$** [$0.853, 0.931$]<br>**$0.9390$** [$0.912, 0.960$] | $3.05\text{ cm}$<br>$2.19\text{ cm}$<br>$2.91\text{ W/kg}$<br>$0.09\text{ m/s}$ | $8.44\text{ cm}$<br>$6.07\text{ cm}$<br>$8.07\text{ W/kg}$<br>$0.24\text{ m/s}$ |
+| **CMJNA Unbalanced LMM**<br>($n=67\text{ subjs}, 334\text{ obs}$) | Total COM Height<br>Takeoff-Vel Height<br>Peak Power<br>Takeoff Velocity | $40.30\text{ cm}$<br>$29.62\text{ cm}$<br>$45.59\text{ W/kg}$<br>$2.39\text{ m/s}$ | —<br>—<br>—<br>— | **$\text{ICC}_{\text{LMM}} = 0.9189$** ($\sigma_b = 8.22, \sigma_w = 2.44\text{ cm}$)<br>**$\text{ICC}_{\text{LMM}} = 0.9467$** ($\sigma_b = 7.71, \sigma_w = 1.83\text{ cm}$)<br>**$\text{ICC}_{\text{LMM}} = 0.9373$** ($\sigma_b = 7.30, \sigma_w = 1.89\text{ W/kg}$)<br>**$\text{ICC}_{\text{LMM}} = 0.9497$** ($\sigma_b = 0.32, \sigma_w = 0.07\text{ m/s}$) | — | — | — |
+
+---
+
+### QA Audit & Sensitivity to Negative Terminal Forces
+- **Negative Terminal Forces**: Exactly 36 trials ($5.43\%$) end with $F[-1] < 0.0\text{ BW}$, down to a minimum of $-0.0102\text{ BW}$ ($-7.5\text{ N}$). This is an expected consequence of force plate zero-offset drift ($\pm 10\text{ N}$) around the $10\text{ N}$ takeoff cutoff.
+- **Robustness**: Recomputing the primary CMJNA 4-trial set on clean trials without negative terminal force ($n=55$ subjects, $220$ obs) yields $\text{ICC}(2, 1) = 0.8945$ ($\Delta = -0.0115$) and $\text{CV} = 5.07\%$ ($\Delta = +0.15\%$). The terminal zero offset has negligible impact on reported reliability.
+- **Outlier Check**: Zero trials exceed $0.02\text{ BW}$ ($2\%$ BW) at takeoff.
+- **Scientific Limits**: Signals are pre-trimmed to takeoff ($1000\text{ Hz}$); flight time and landing mechanics cannot be assessed from this force dataset alone.
+
+*Figure References*:
+- [`reports/figures/cmj_open_data_validation.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_open_data_validation.png)
+- [`reports/figures/cmj_open_data_reliability.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_open_data_reliability.png)
+
+---
+
 ## Verification & Test Suite
-The pipeline is verified by **57 automated tests** spanning schemas, validators, analytical synthesizers, biomechanical phase detectors, and real-data verification:
-- Unit, synthetic & real-data suite: `uv run pytest -v -m "not slow"` (56 passed).
+The pipeline is verified by **68 automated tests** spanning schemas, validators, analytical synthesizers, biomechanical phase detectors, real-data verification, and open-data reliability:
+- Fast unit, synthetic, real & open-data suite: `uv run pytest -v -m "not slow"` (67 passed in ~12s).
+- Open dataset suite: `uv run pytest tests/test_cmj_open.py` (11 passed). Verifies subject reconciliation, naming contracts, provenance retention, numerical reproduction, and reliability formulas.
 - Monte Carlo accuracy: `uv run pytest tests/test_cmj.py -m slow` ($N = 200$ trials across 9 conditions verifying 95th-percentile bounds for $h_{\text{imp}}$, $h_{\text{flt}}$, onset, takeoff, and landing).
-- Real data test suite: `uv run pytest tests/test_cmj_real.py` (8 passed). Ensures mass plausibility, negative force flagging, timestamp irregularity detection, reference data parsing, and zero private data leakage.
-- AI transparency: All biomechanical equations and signal processing logic cross-checked against peer-reviewed literature (McMahon et al. 2018, Chavda et al. 2018, Linthorne 2001). Results verified against known synthetic ground truths and independent Excel references.
+- Real data test suite: `uv run pytest tests/test_cmj_real.py` (8 passed).
+- AI transparency: All biomechanical equations and signal processing logic cross-checked against peer-reviewed literature (McMahon et al. 2018, Chavda et al. 2018, White et al. 2022). Results verified against known synthetic ground truths, independent Excel references, and Zenodo open research datasets.
+
 
