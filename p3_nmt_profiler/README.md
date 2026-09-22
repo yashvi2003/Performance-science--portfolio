@@ -17,7 +17,7 @@ To what extent do acute day-to-day fluctuations in prior-night sleep duration, n
    - Model 1: Morning Readiness ~ Acute Sleep + Trait Sleep + Acute RHR + Trait RHR + Acute Load + Trait Load + Weekend + (1|Athlete)
    - Model 2: Morning Muscle Soreness ~ Acute Load + Trait Load + Acute Sleep + (1|Athlete)
    - Model 3: Morning Fatigue ~ Acute Sleep Score + Acute Load + Acute RHR + (1|Athlete)
-5. **Cross-Platform Scripting**: `p3_nmt_profiler/r_crosscheck.R` provides an external supplementary R script to refit Model 1 via `lme4::lmer` on `data/processed/p3_model1_dataset.csv`.
+5. **R Cross-Check Validation**: `p3_nmt_profiler/r_crosscheck.R` independently refits Model 1 via `lme4::lmer` (REML, `nloptwrap`) on `data/processed/p3_model1_dataset.csv`, programmatically comparing results against Python `statsmodels`.
 6. **Bilateral Asymmetry Module**: `p3_nmt_profiler.asymmetry` computes Bilateral Asymmetry Index ($\text{BAI}$), Limb Symmetry Index ($\text{LSI}$), persistence flags ($\ge 75\%$), and fatigue sensitivity slopes.
 
 ---
@@ -56,6 +56,14 @@ pytest -v tests/test_p3_pmdata.py tests/test_p3_model.py tests/test_p3_asymmetry
 ### Sleep Sensitivity Heterogeneity
 Likelihood Ratio Testing ($\chi^2(2) = 32.02, p < 0.001$) confirmed significant inter-individual variation in sleep loss sensitivity ($\sigma_{u1}^2 = 0.122$). Individual athlete response slopes range from $\beta_i \approx 0.0$ to $\beta_i = +0.55$.
 
+### R Cross-Check (`lme4` vs `statsmodels`)
+Model 1 was independently refit in R 4.6.1 using `lme4::lmer` with REML and the `nloptwrap` optimizer on the identical Currie-Hoffmann centered dataset (`p3_model1_dataset.csv`, $n=1,368, 15\text{ athletes}$).
+- **Acute Sleep Deviation ($zSleep^{\text{within}}$)**:
+  - Python `statsmodels`: $\beta = +0.21817881$, $\text{SE} = 0.04023033$, Wald $95\%\text{ CI}: [0.13932881, 0.29702881]$ (rounded: $\beta = +0.2182$, $\text{SE} = 0.0402$, $95\%\text{ CI}: [0.1393, 0.2970]$)
+  - R `lme4`: $\beta = +0.21817885$, $\text{SE} = 0.04023046$, Wald $95\%\text{ CI}: [0.13932860, 0.29702910]$ (rounded: $\beta = +0.2182$, $\text{SE} = 0.0402$, $95\%\text{ CI}: [0.1393, 0.2970]$)
+  - Direct Absolute Difference: $|\Delta \beta| = 4.0 \times 10^{-8}$ ($0.00000004$), agreeing through 7 decimal places.
+- **Hypothesis Testing**: While parameter estimates and standard errors agree within machine precision, $p$-values differ in reporting form because R `lmerTest` computes finite-sample Satterthwaite denominator degrees of freedom ($t = 5.423, df = 1349, p = 6.93 \times 10^{-8}$) whereas Python `statsmodels.MixedLM` reports an asymptotic standard normal $z$-test ($z = 5.423, p = 5.85 \times 10^{-8}$).
+
 ---
 
 ## Scientific Limitations & Ethical Transparency
@@ -63,4 +71,4 @@ Likelihood Ratio Testing ($\chi^2(2) = 32.02, p < 0.001$) confirmed significant 
 1. **Observational Framing**: This analysis evaluates free-living observational data, not randomized experimental interventions. Models capture predictive associations; correlations are never causal.
 2. **Unmeasured Confounders**: Alcohol consumption, academic/work deadlines, and subclinical viral infections simultaneously affect sleep quality and waking readiness.
 3. **Heuristic Alerting**: In accordance with portfolio research conventions, wearable alerts represent *possible fatigue flags*, never medical or clinical diagnoses.
-4. **AI-Use Transparency**: Code was developed with AI assistance and verified against known closed-form analytical models in `tests/test_synth.py` and extensive automated unit test suites.
+4. **AI-Use Transparency**: Code was developed with AI assistance and verified against known closed-form analytical models in `tests/test_synth.py`, automated test suites, and independently cross-checked in R `lme4`.

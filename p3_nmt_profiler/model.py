@@ -301,13 +301,37 @@ def fit_model_1_readiness(
     )
     mod = smf.mixedlm(formula, model_df, groups=model_df["athlete_id"])
     res = mod.fit(reml=True)
-    return extract_fit_result(
+    fit_result = extract_fit_result(
         model_name="Model 1: Next-Day Readiness",
         dependent_var="readiness",
         res=res,
         data=model_df,
         formula=formula,
     )
+
+    # Export dataset and python parameters for programmatic cross-check
+    try:
+        proc_dir = Path("data/processed")
+        proc_dir.mkdir(parents=True, exist_ok=True)
+        model_df[req_cols].to_csv(proc_dir / "p3_model1_dataset.csv", index=False)
+        conf_raw = res.conf_int()
+        py_results_df = pd.DataFrame([
+            {
+                "term": term,
+                "coef": float(res.params[term]),
+                "std_err": float(res.bse[term]),
+                "z_stat": float(res.tvalues[term]),
+                "p_value": float(res.pvalues[term]),
+                "ci_lower": float(conf_raw.loc[term, 0]),
+                "ci_upper": float(conf_raw.loc[term, 1]),
+            }
+            for term in res.params.index if term != "Group Var"
+        ])
+        py_results_df.to_csv(proc_dir / "p3_model1_py_results.csv", index=False)
+    except Exception as exc:
+        logger.warning("Could not export Model 1 dataset/results: %s", exc)
+
+    return fit_result
 
 
 def fit_model_2_soreness(

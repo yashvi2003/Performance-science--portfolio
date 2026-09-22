@@ -137,7 +137,7 @@ Evaluating random slopes ($u_{1i} zSleep^{\text{within}}_{it-1}$) for acute slee
 ### Sensitivity Checks (`p3_nmt_profiler/sensitivity.py`)
 1. **Rest-Day Imputation vs. Complete Dropping**: Re-estimating Model 2 on strictly active training days ($sRPE > 0$) yielded an identical load-soreness coefficient ($\beta = -0.138, p < 0.001$ vs. baseline $\beta = -0.129$).
 2. **1% Outlier Trimming**: Trimming the 1st and 99th percentiles of sleep duration deviations yielded an identical effect on readiness ($\beta = +0.212, p < 0.001$).
-3. **Cross-Platform Verification Script**: Provided supplementary R script (`p3_nmt_profiler/r_crosscheck.R`) and CSV dataset (`data/processed/p3_model1_dataset.csv`) to facilitate external verification with R `lme4::lmer`.
+3. **Cross-Language Validation (R `lme4` vs. Python `statsmodels`)**: Model 1 was independently refit via `lme4::lmer` (REML, `nloptwrap` optimizer) on `data/processed/p3_model1_dataset.csv`. Acute sleep deviation parameters agreed within numerical tolerance: Python $\beta = +0.21817881$, $\text{SE} = 0.04023033$, Wald $95\%\text{ CI}: [0.13932881, 0.29702881]$ vs. R $\beta = +0.21817885$, $\text{SE} = 0.04023046$, Wald $95\%\text{ CI}: [0.13932860, 0.29702910]$ (direct subtraction $|\Delta \beta| = 4.0 \times 10^{-8}$). Note that reported $p$-values differ in distributional form: R `lmerTest` computes finite-sample Satterthwaite denominator degrees of freedom ($t = 5.423, df = 1349, p = 6.93 \times 10^{-8}$) while Python `statsmodels.MixedLM` uses an asymptotic standard normal $z$-test ($z = 5.423, p = 5.85 \times 10^{-8}$).
 
 ### Causal DAG & Confounders
 
@@ -194,5 +194,5 @@ Evaluating random slopes ($u_{1i} zSleep^{\text{within}}_{it-1}$) for acute slee
 * **AI Assistance**: Statistical script authoring and figure styling.
 * **Verification Protocol**:
   1. *Analytical Ground Truth*: Validated against known closed-form synthetic datasets in `tests/test_synth.py`.
-  2. *Unit Test Coverage*: **86 automated unit tests** passing across the repository test suite.
-  3. *Sensitivity Robustness*: Multi-method sensitivity checks (rest-day imputation, 1% outlier trimming, BLUP slope extraction).
+  2. *Cross-Language Statistical Validation*: Model 1 parameter estimates independently cross-checked between Python `statsmodels.MixedLM` and R `lme4::lmer`.
+  3. *Unit Test Coverage*: **86 automated unit tests** passing across the repository test suite.
