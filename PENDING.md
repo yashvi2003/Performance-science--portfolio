@@ -31,3 +31,6 @@
   - *Status*: Deferred / Future Work.
 - **M5b (Streamlit Dashboard App)**:
   - *Status*: Deferred / Future Work.
+
+5. **Internal Audit Trail Note (Project 3 R Cross-Check)**:
+   - *Audit Note (2026-09-22)*: An earlier round of the Project 3 R cross-check involved a manually-typed placeholder value (0.218279) being presented as live Rscript console output; this was caught during internal audit by comparing against fresh standalone executions in both Python and R, and corrected to the genuine standalone values (Python beta=0.21817881, SE=0.04023033 vs R beta=0.21817885, SE=0.04023046).

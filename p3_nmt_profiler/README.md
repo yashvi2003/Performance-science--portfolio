@@ -61,8 +61,12 @@ Model 1 was independently refit in R 4.6.1 using `lme4::lmer` with REML and the 
 - **Acute Sleep Deviation ($zSleep^{\text{within}}$)**:
   - Python `statsmodels`: $\beta = +0.21817881$, $\text{SE} = 0.04023033$, Wald $95\%\text{ CI}: [0.13932881, 0.29702881]$ (rounded: $\beta = +0.2182$, $\text{SE} = 0.0402$, $95\%\text{ CI}: [0.1393, 0.2970]$)
   - R `lme4`: $\beta = +0.21817885$, $\text{SE} = 0.04023046$, Wald $95\%\text{ CI}: [0.13932860, 0.29702910]$ (rounded: $\beta = +0.2182$, $\text{SE} = 0.0402$, $95\%\text{ CI}: [0.1393, 0.2970]$)
-  - Direct Absolute Difference: $|\Delta \beta| = 4.0 \times 10^{-8}$ ($0.00000004$), agreeing through 7 decimal places.
-- **Hypothesis Testing**: While parameter estimates and standard errors agree within machine precision, $p$-values differ in reporting form because R `lmerTest` computes finite-sample Satterthwaite denominator degrees of freedom ($t = 5.423, df = 1349, p = 6.93 \times 10^{-8}$) whereas Python `statsmodels.MixedLM` reports an asymptotic standard normal $z$-test ($z = 5.423, p = 5.85 \times 10^{-8}$).
+  - Direct Absolute Difference: $|\Delta \beta| = 4.3 \times 10^{-8}$ ($0.0000000428$), agreeing to ~1e-7.
+- **Variance Components & Numerical Independence**:
+  - Residual Variance ($\sigma_\epsilon^2$): Python $= 2.12187528$ vs. R $= 2.12188964$ ($|\Delta| = 1.4 \times 10^{-5}$).
+  - Group Variance ($\sigma_u^2$): Python $= 1.44899925$ vs. R $= 1.44771033$ ($|\Delta| = 1.3 \times 10^{-3}$).
+  - *Methodological Note*: While fixed-effect estimates agree to $\approx 10^{-7}$, variance components differ more substantially ($1.4 \times 10^{-5}$ residual, $1.3 \times 10^{-3}$ group). This pattern (extremely tight fixed-effect agreement alongside looser variance-component agreement) is the expected signature of distinct REML optimization routines (Powell/L-BFGS vs. `nloptwrap`/BOBYQA) on a well-conditioned model: conditional on finding the approximate 1D variance ratio peak, fixed effects are calculated via closed-form Generalized Least Squares (GLS), confirming the two fits were genuinely independent.
+- **Hypothesis Testing**: $p$-values differ in reporting form because R `lmerTest` computes finite-sample Satterthwaite denominator degrees of freedom ($t = 5.423, df = 1349, p = 6.93 \times 10^{-8}$) whereas Python `statsmodels.MixedLM` reports an asymptotic standard normal $z$-test ($z = 5.423, p = 5.85 \times 10^{-8}$).
 
 ---
 
