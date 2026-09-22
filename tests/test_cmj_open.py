@@ -214,3 +214,72 @@ class TestQAFlagsAssignment:
         for i in range(open_dataset.n_trials):
             res = analyze_open_trial(open_dataset, i)
             assert res.flag_terminal_force_outlier is False
+
+
+class TestReconciliationVerifications:
+    """Verifications requested for Milestone M2g final sign-off."""
+
+    def test_peak_power_integration_mechanism_and_swansea_gravity(self, open_dataset: OpenDataset):
+        """Verify the exact mathematical mechanism reconciling Euler vs Trapezoid and local Swansea g."""
+        # 1. With trapezoidal integration and Swansea local gravity g=9.81200, reproduction is exact
+        sample_trials = [0, 1, 10, 55, 100, 280, 500]
+        for t in sample_trials:
+            f_bw = np.asarray(open_dataset.grf_signals[t], dtype=np.float64)
+            dt = 1.0 / open_dataset.grf_sampling_rate
+            ref_pp = float(open_dataset.peak_power[t])
+
+            # Swansea local g trapezoid
+            acc_sw = (f_bw - 1.0) * 9.81200
+            from scipy.integrate import cumulative_trapezoid
+            v_sw = cumulative_trapezoid(acc_sw, dx=dt, initial=0.0)
+            pp_sw = np.max((f_bw * 9.81200) * v_sw)
+            assert np.isclose(pp_sw, ref_pp, atol=2e-4)
+
+            # Standard g trapezoid (underestimates ref due to 9.80665 < 9.81200)
+            res_std = analyze_open_trial(open_dataset, t, g=STANDARD_G_M_PER_S2)
+            assert res_std.peak_power_w_per_kg < ref_pp
+
+            # Standard g Euler (np.cumsum overestimates ref due to +0.5*a*dt offset)
+            acc_std = (f_bw - 1.0) * STANDARD_G_M_PER_S2
+            v_euler = np.cumsum(acc_std) * dt
+            pp_euler = np.max((f_bw * STANDARD_G_M_PER_S2) * v_euler)
+            assert pp_euler > ref_pp
+
+    def test_negative_terminal_force_sensitivity_traceability(self, open_dataset: OpenDataset):
+        """Verify the exact count of 20 negative-terminal trials across 15 subjects in CMJNA primary set."""
+        _, df = process_all_open_trials(open_dataset)
+        df_cmjna = df[df["condition_name"] == "CMJNA"].sort_values("trial_idx")
+
+        mat_primary, subjs_primary, _ = build_balanced_trial_matrix(
+            df, condition="CMJNA", k_trials=4, metric_col="jump_height_total_com_m"
+        )
+        assert len(subjs_primary) == 66
+        assert mat_primary.size == 264
+
+        # Extract the exact 264 observations
+        primary_indices = []
+        for s in subjs_primary:
+            primary_indices.extend(df_cmjna[df_cmjna["subject_id"] == s].iloc[:4]["trial_idx"].tolist())
+        df_primary = df_cmjna[df_cmjna["trial_idx"].isin(primary_indices)]
+
+        # Exactly 20 trials with negative terminal force
+        neg_trials = df_primary[df_primary["flag_negative_terminal_force"]]
+        assert len(neg_trials) == 20
+
+        # Spanning exactly 15 unique subjects
+        neg_subjs = sorted(neg_trials["subject_id"].unique())
+        assert len(neg_subjs) == 15
+        assert neg_subjs == [3, 5, 15, 17, 25, 34, 42, 47, 48, 50, 51, 53, 56, 60, 65]
+
+        # Rule A: Strict whole-subject exclusion drops all 15 subjects -> 66 - 15 = 51 subjects
+        strict_subjs = [s for s in subjs_primary if s not in neg_subjs]
+        assert len(strict_subjs) == 51
+
+        # Rule B: Per-trial exclusion retains 4 subjects with clean trials 5-8 -> 66 - 11 = 55 subjects
+        df_clean = df[~df["flag_negative_terminal_force"]]
+        _, subjs_clean, _ = build_balanced_trial_matrix(
+            df_clean, condition="CMJNA", k_trials=4, metric_col="jump_height_total_com_m"
+        )
+        assert len(subjs_clean) == 55
+        saved_subjs = set(neg_subjs).intersection(set(subjs_clean))
+        assert saved_subjs == {17, 42, 60, 65}

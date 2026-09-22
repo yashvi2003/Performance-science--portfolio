@@ -169,7 +169,7 @@ To avoid ambiguous aliasing between flight trajectory height and total center of
 | **Peak Power (W/kg)** | $48.69\text{ W/kg}$ | $48.64\text{ W/kg}$ | $-0.053\text{ W/kg}$ | $-0.109\%$ | **$1.000000$** | **PASS** |
 | **Total COM Jump Height (cm)** | $44.16\text{ cm}$ | $44.26\text{ cm}$ | $+0.101\text{ cm}$ | $+0.235\%$ | **$1.000000$** | **PASS** |
 
-*Note on Physical Constants*: The pipeline strictly maintains $g = 9.80665\text{ m/s}^2$. The constant $-0.109\%$ power offset and $+1.0\text{ mm}$ height offset stem from the reference data's use of $g = 9.80\text{ m/s}^2$.
+*Note on Physical Constants & Local Gravity Calibration*: The pipeline strictly maintains standard gravity $g = 9.80665\text{ m/s}^2$. Parameter sweep and Somigliana theoretical gravity analysis confirmed White et al. (Swansea University, lat $51.62^\circ\text{ N}$) used local UK gravity $g = 9.81200\text{ m/s}^2$. Evaluated at $g = 9.81200\text{ m/s}^2$, calculated peak power matches reference values with mean diff $+0.00000\text{ W/kg}$ (max $|\text{diff}| = 0.00010\text{ W/kg}$). Under standard gravity ($g = 9.80665\text{ m/s}^2$), peak power is physically $(9.80665/9.81200)^2 = -0.109\%$ lower ($-0.0531\text{ W/kg}$), matching physical theory exactly.
 
 ---
 
