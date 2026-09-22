@@ -107,6 +107,10 @@ A Bland-Altman method comparison was conducted between the impulse-momentum theo
 - **Standard Deviation of Differences**: $0.0153\text{ m}$ ($1.53\text{ cm}$).
 - **95% Limits of Agreement**: **$-0.0399\text{ m}$ to $+0.0203\text{ m}$** ($-4.0\text{ cm}$ to $+2.0\text{ cm}$).
 - **Individual Pairings**: In 9 out of 10 trials, the methods agree within $0.3\text{--}2.2\text{ cm}$.
+- **Flight-Floor Offset vs. Height Difference Correlation**:
+  - Across all 10 trials, mid-flight baseline force averages $+4.22\text{ N}$ (range $+3.17\text{ N}$ to $+6.02\text{ N}$, $\text{SD} \approx 0.88\text{ N}$).
+  - An uncorrected positive tare shift $+F_{\text{floor}}$ inflates baseline body weight and mass, producing a predictable theoretical downward bias on $h_{\text{imp}}$ of $\Delta h \approx -2(F_{\text{floor}}/BW)h_{\text{imp}}$, averaging **$-3.83\text{ mm}$** across this cohort (range $-2.58\text{ mm}$ to $-5.75\text{ mm}$).
+  - However, flight-floor offset **does not correlate** with the $(h_{\text{imp}} - h_{\text{flt}})$ difference across trials ($r = +0.0622$, $p = 0.864$; Spearman $\rho = -0.0667$, $p = 0.855$). This occurs because between-athlete variation in landing mechanics (landing knee/ankle flexion creating $\Delta y_{\text{COM}} \approx \pm 2\text{--}8\text{ cm}$, which shifts $h_{\text{flt}}$ by $\pm 10\text{--}40\text{ mm}$) completely dominates the $<1\text{ mm}$ between-athlete spread in sensor offset bias.
 - **Caution on Sample Size**: With $n = 10$, confidence intervals around the limits of agreement are wide (lower LoA CI: $-5.9$ to $-2.1\text{ cm}$; upper LoA CI: $+0.1$ to $+3.9\text{ cm}$) and represent indicative between-subject agreement, not within-subject reliability.
 
 *Figure Reference*: [`reports/figures/cmj_bland_altman.png`](file:///c:/Yashvi/Internship%202027/portfolio-agent-kit/reports/figures/cmj_bland_altman.png)
@@ -118,7 +122,10 @@ We systematically evaluated the stability of $h_{\text{imp}}$, $\text{RSImod}$, 
 1. **Onset SD Multiplier ($k = 3.0, 5.0, 8.0$)**: Jump height moved by $<1.0\text{ mm}$ across all 10 trials. RSImod shifted by $<0.008\text{ m/s}$.
 2. **Quiet Window Duration ($0.30, 0.50, 0.70\text{ s}$)**: Jump height moved by $<1.5\text{ mm}$.
 3. **Takeoff Force Threshold ($5.0, 10.0, 20.0\text{ N}$)**: Jump height moved by $<2.8\text{ mm}$.
-4. **Landing Force Threshold ($5.0, 10.0, 20.0\text{ N}$)**: Because landing threshold only affects $h_{\text{flt}}$ and landing impact timing, $h_{\text{imp}}$, $\text{RSImod}$, and propulsion peak power were completely invariant ($\Delta = 0.0000$).
+4. **Landing Force Threshold ($5.0, 10.0, 20.0\text{ N}$)**:
+   - While $h_{\text{imp}}$, $\text{RSImod}$, and propulsion peak power are strictly invariant ($\Delta = 0.0000$) because they terminate prior to takeoff, landing time $t_{\text{land}}$ was audited across all 10 trials.
+   - **Monotonicity**: $t_{\text{land}}(5\text{ N}) \le t_{\text{land}}(10\text{ N}) \le t_{\text{land}}(20\text{ N})$ was verified in **10 out of 10 trials** ($100\%$).
+   - On the steep landing contact wavefront ($dF/dt > 20,000\text{ N/s}$), force rockets from baseline directly through $20\text{ N}$ within $\le 0.5\text{--}1.0\text{ ms}$ ($0\text{--}2\text{ samples}$ at $2000\text{ Hz}$), confirming that detection at $5\text{ N}$ is strictly capturing real ground impact rather than flight-phase noise chatter or window fall-through.
 5. **Filter Cutoff Frequency ($15, 30, 50\text{ Hz}$)**:
    - Jump height moved by $<3.9\text{ mm}$ across all trials.
    - Peak mechanical power showed high sensitivity in explosive trials: filtering at $15\text{ Hz}$ vs $30\text{ Hz}$ attenuated peak power by up to $82.4\text{ W}$ in `T02` ($3898\text{ W} \to 3980\text{ W}$) and $79.9\text{ W}$ in `T06` ($4976\text{ W} \to 5056\text{ W}$). Cutoffs $\ge 30\text{ Hz}$ are essential to preserve peak mechanical power transients.
