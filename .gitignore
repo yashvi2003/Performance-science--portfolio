@@ -1,15 +1,18 @@
-# Data: never commit athlete or third-party data
+# Data: raw and private data
 data/raw/
 data/private/
 *.xlsx
 *.npz
-# Python
+
+# Python & Virtual Environments
 .venv/
 __pycache__/
 .pytest_cache/
 *.pyc
 .env
-# Outputs that may embed real data
+
+# Outputs & Archives
 outputs_private/
 desktop.ini
 *.vsix
+*.zip

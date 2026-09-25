@@ -292,7 +292,7 @@ python -m p1_nmt_pipeline.cli --input data/raw/cmj --output data/processed/sessi
 ## AI-Use Transparency & Verification
 
 In accordance with portfolio research conventions:
-- **AI Application**: Large language model agents (Google Antigravity) were utilized for rapid scaffolding of modular pipeline components, unit test authoring, CLI argument parsing, Matplotlib grid layout design, and running regression checks.
+- **AI Assistance**: AI coding assistants were utilized for scaffolding modular pipeline components, unit test authoring, and test regression checks.
 - **Verification of Mathematical & Biomechanical Formulas**:
   - All mathematical equations (trapezoidal impulse integration, McMahon phase definitions, Somigliana normal gravity formula, Shrout & Fleiss $\text{ICC}(2, 1)$ / $\text{ICC}(3, 1)$, Weir $\text{SEM}$ and $\text{MDC}_{95}$) were independently checked against peer-reviewed literature.
   - Closed-form synthetic ground truths verified numerical integration precision across varying sampling rates ($250\text{--}2000\text{ Hz}$).

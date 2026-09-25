@@ -194,12 +194,6 @@ def main():
     plt.close()
     print(f"Saved figure to {out_path}")
 
-    # Copy to artifacts directory
-    artifact_dir = Path(r"C:\Users\user\.gemini\antigravity-ide\brain\d1ca1bcf-817b-4754-939e-431a45ae1bd0")
-    if artifact_dir.exists():
-        shutil.copy(out_path, artifact_dir / "cmj_all_templates_detection.png")
-        print(f"Copied figure to {artifact_dir / 'cmj_all_templates_detection.png'}")
-
 
 if __name__ == "__main__":
     main()

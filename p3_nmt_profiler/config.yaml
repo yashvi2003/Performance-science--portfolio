@@ -6,14 +6,12 @@ dataset:
   output_csv: "data/processed/wearable_daily.csv"
 
 proxies:
-  # PMData does not contain native proprietary WHOOP strain (0-21).
   # Documented strain proxy: Daily Session-RPE (Foster et al., 2001) = sum(perceived_exertion * duration_min).
   day_strain:
     source: "pmsys/srpe.csv"
     method: "sum_srpe"  # sum of perceived_exertion * duration_min per day
     fill_no_training_days: 0.0  # Zero training load on rest days
   
-  # PMData does not contain native WHOOP recovery score (0-100%).
   # Documented recovery proxy: PMSys daily readiness score (scale 1-10 scaled to 0-100%),
   # or Fitbit sleep overall_score (0-100%).
   recovery_pct:

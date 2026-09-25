@@ -46,7 +46,7 @@ How does acute prior-day session training load impact next-day muscle soreness a
 - **Hardware & Software**:
   1. *Fitbit Versa 2*: Smartwatch tracking optical photoplethysmography (PPG) heart rate, resting heart rate, sleep duration and sleep stages (deep, light, REM, awake), daily steps, and calories.
   2. *PMSys Smartphone Application*: Daily self-reported wellness logs administered each morning upon waking (readiness, fatigue, mood, soreness, stress, sleep duration, sleep quality) and session-RPE training logs completed post-workout.
-
+0
 ### Metric Operationalization & Schema Mapping (`wearable_daily.csv`)
 
 | Variable in Contract | Source in PMData | Operational Definition / Formula | Unit | Proxy Documentation |

@@ -1,8 +1,5 @@
 # Project 2: Baselines, Readiness Index, SQL Layer and Longitudinal Reporting (`p2_nmt_reports`)
 
-**Author**: Candidate for Performance Science & Data Analytics Research Co-Op  
-**Governing Specs**: `specs/02_reporting_engine.md`, `specs/00_shared_contract.md`, `AGENTS.md`
-
 ---
 
 ## 1. Research & Practical Problem

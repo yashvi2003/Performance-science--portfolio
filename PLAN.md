@@ -1,9 +1,4 @@
-# Neuromuscular Monitoring Toolkit: Master Architecture & Implementation Plan
-
-**Target Positions**:
-- **Primary**: WHOOP Performance Science & Health Outcomes Co-Op (Spring 2027)
-- **Fallback**: WHOOP Data Analytics Co-Op (Spring 2027)
-- **Reference**: `specs/04_target_roles.md`
+# Sports Performance & Biomechanics Analytics Toolkit: Master Architecture & Implementation Plan
 
 **Standing Instructions & Governance**: `AGENTS.md`, `STATUS.md`, `specs/00_shared_contract.md`.
 
@@ -42,7 +37,6 @@ portfolio-agent-kit/                # Single repository root (workspace root)
 │   ├── 01_neuromuscular_pipeline.md# Spec for Project 1 (VALD-style jump engine)
 │   ├── 02_reporting_engine.md      # Spec for Project 2 (SQL, baselines, readiness)
 │   ├── 03_asymmetry_profiler.md    # Spec for Project 3 (RWE wearable analysis, asymmetry)
-│   ├── 04_target_roles.md          # Job requirement alignment
 │   └── 05_input_data_profile.md    # Biomechanical characteristics of raw data
 ├── scripts/
 │   ├── progress.py                 # Terminal progress tracker parsed from STATUS.md
@@ -318,7 +312,7 @@ Transparent, deterministic feature tree:
 - [ ] **M1a**: Loaders via shared contract & 28-day rolling personal baselines.
 - [ ] **M1b**: DuckDB SQL layer with window functions & Pandas equivalence test suite.
 - [ ] **M2a**: Direction-aware readiness index & documented heuristic weights.
-- [ ] **M2b**: Daily wearable join with WHOOP-compatible metric names.
+- [ ] **M2b**: Daily wearable telemetry join with standardized recovery metric names.
 - [ ] **M2c**: Multi-tier alert logic (SWC, red zone recovery, multi-metric decline).
 - [ ] **M2d**: Mixed-effects session change model in `statsmodels`.
 - [ ] **M3**: Visualization module (metric vs baseline bands, recovery overlays).
@@ -333,13 +327,13 @@ Transparent, deterministic feature tree:
 - [ ] **M3**: Causal inference framework (DAG, confounder analysis, sensitivity bounds).
 - [ ] **M4**: Asymmetry module ($ASI$, direction, persistence flag).
 - [ ] **M5a**: Longitudinal strain-readiness publication figures & test suite.
-- [ ] **M5b**: Two-page executive research brief formatted for WHOOP research evaluation.
+- [ ] **M5b**: Two-page executive research brief formatted for performance science research evaluation.
 
 ---
 
 ## 7. Assumptions & Technical Decisions
 
-- **Assumption 1 (Repo Root)**: The workspace root `portfolio-agent-kit/` is the single repository root. All project files sit directly at this root, and git is initialized there.
+- **Assumption 1 (Repo Root)**: The workspace root is the single repository root. All project files sit directly at this root, and git is initialized there.
 - **Sampling-Rate-Dependent Test Tolerances**:
   - At 2000 Hz ($\Delta t = 0.5 \text{ ms}$): tolerance $\le 1\text{--}2 \text{ mm}$ ($0.001\text{--}0.002 \text{ m}$) for jump height.
   - At 250 Hz ($\Delta t = 4.0 \text{ ms}$): looser tolerance $\le 5\text{--}10 \text{ mm}$ ($0.005\text{--}0.010 \text{ m}$), accounting for discrete sampling integration error.
@@ -350,6 +344,6 @@ Transparent, deterministic feature tree:
 - **Flight-Phase Force-Offset Correction**:
   Optional config flag (`correct_flight_phase_offset: false`, off by default). The synthetic generator can inject non-zero offsets (`flight_force_offset_n`) for testing.
 - **Strict Synthetic-Only & Data Privacy Rule**:
-  No `.xlsx` files, `data/private/`, or `data/raw/` files will be read, opened, copied, or processed. All development, validation, and testing will use synthetic data only.
-- **No Affiliation Claim**:
-  Field names mirror publicly documented WHOOP terminology, but the codebase contains an explicit disclaimer that this is an independent academic portfolio not affiliated with WHOOP Inc.
+  No `.xlsx` files, `data/private/`, or `data/raw/` files will be read, opened, copied, or processed. All development, validation, and testing will use synthetic data and authorized de-identified benchmarks only.
+- **Standardized Wearable Schema**:
+  Field names mirror publicly documented industry wearable terminology (recovery %, sleep duration, resting HR, HRV, day strain) for seamless integration with commercial wearable data.

@@ -1,36 +1,120 @@
-# Portfolio: Neuromuscular monitoring toolkit
+# Sports Performance & Biomechanics Analytics Toolkit
 
-Target: WHOOP Performance Science & Health Outcomes Co-Op (main) and Data Analytics Co-Op (fallback); see specs/04_target_roles.md.
+[![Tests](https://img.shields.io/badge/pytest-100%20passed-success)](tests/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
+[![SQL Engine](https://img.shields.io/badge/SQL-DuckDB-orange)](p2_nmt_reports/sql/)
+[![Stats](https://img.shields.io/badge/models-Linear%20Mixed--Effects%20(Python%20%2B%20R)-purple)](p3_nmt_profiler/)
 
-Three projects, one shared data contract:
-1. Project 1: automatic jump analysis engine (identify the jump, metrics, VALD-style graph, drop-a-file app)
-2. Project 2: baselines, readiness, SQL layer and longitudinal reporting
-3. Project 3: real-world-evidence statistics on public wearable data (mixed models, causal thinking) plus asymmetry module
+An applied sports performance engineering and data science portfolio containing three modular, production-tested pipelines for **force-plate jump biomechanics**, **SQL longitudinal readiness baselines**, and **longitudinal wearable recovery modeling**.
 
-See AGENTS.md for how the AI agent should work, STATUS.md for progress, and START_PROMPT.md for the message that starts any session.
+---
 
-## First-day checklist (human steps)
-1. Email/meet the professor (permissions, data questions). Also ask whether the athlete data may be analysed with cloud AI coding tools,
-   because the tool sends file contents to an external model provider. Until they answer, keep the real files OUT of the workspace and use synthetic data only.
-2. Unzip this kit, `git init`, first commit (`.gitignore` already excludes data, .xlsx and .npz files). Open the folder in Antigravity as the workspace.
-3. Paste START_PROMPT.md into a new Agent Manager conversation (Planning mode). Approve PLAN.md. Work milestone by milestone.
-4. Only after the professor approves: copy `CMJ.xlsx` and `CMJ_Force_Time_Analysis.xlsx` into `data/private/`, then run
-   `python scripts/import_cmj_xlsx.py --athletes data/private/CMJ.xlsx --reference data/private/CMJ_Force_Time_Analysis.xlsx --out data/raw`.
-5. Download the open White et al. CMJ files (see specs/05_input_data_profile.md) into `data/raw/open/`; this data is CC BY and safe to use with the tool.
-6. After every session run `python scripts/progress.py` and `pytest`, then commit.
-7. Verify what the AI produces (see below).
+## Portfolio Architecture & Modules
 
-## What you must check yourself
-- Formulas in the CMJ module against a textbook or paper: impulse-momentum velocity, jump height, RSImod, peak power.
-- Every detected onset/take-off/landing on the plots for the 10 real trials, especially athletes 3 and 1.
-- That tests use known ground truth (synthetic trials with analytic jump height), not just "runs without errors".
-- That no README number, plot or screenshot comes from the professor's data unless permission is recorded in DATA_SOURCES.md.
-- That every claim in the README and your CV is something the repo actually does.
+```
+portfolio/
+├── p1_nmt_pipeline/      # Project 1: Automated Jump Biomechanics & Signal Processing Engine
+├── p2_nmt_reports/       # Project 2: Rolling Baselines, Readiness Index & DuckDB SQL Layer
+├── p3_nmt_profiler/      # Project 3: Wearable Recovery Profiling & Linear Mixed-Effects Models
+├── shared/               # Strict schema contracts (Pydantic / CSV schemas) and synthetic data generators
+├── reports/              # Figures, summary tables, and technical documentation
+└── tests/                # 100 comprehensive unit, statistical, and cross-engine parity tests
+```
 
-## Minimum viable portfolio (if time runs short)
-Tell the agent to work in this order and leave the rest as "future work":
-1. Project 0 setup and shared contract.
-2. Project 1 up to M2f (CMJ engine, real-data validation, sensitivity) plus M5a (single-trial report).
-3. Project 3 M1a-M3 (wearable adapter, written analysis plan, mixed-effects analysis, causal-thinking section).
-4. Project 2 M1b (SQL layer) plus M2d (mixed model on labelled synthetic data).
-5. The 2-page research brief.
+---
+
+### Project 1: Automatic Jump Analysis Engine (`p1_nmt_pipeline`)
+*Automated force-time curve partitioning, event detection, and impulse-momentum numerical integration adhering to consensus standards ([McMahon et al., 2018](https://doi.org/10.1519/SSC.0000000000000377)).*
+
+* **Automated Phase Segmentation**: Detection of Quiet-standing baseline, Unweighting trough, Zero-velocity transition ($v(t)=0$), Peak propulsion force, Takeoff, Flight floor, and Landing absorption impact.
+* **Core Metrics**: Impulse-momentum jump height, flight-time jump height, Modified Reactive Strength Index ($\text{RSImod} = \text{JH} / \text{Time to Takeoff}$), peak power via trapezoidal integration, and concentric/eccentric duration ratios.
+* **Signal Robustness & Flight Sensor Offsets**: Zero-phase low-pass Butterworth filtering, adaptive noise-floor calibration, and sub-sample extrapolation to eliminate threshold truncation biases.
+* **Validation**: Monte Carlo accuracy testing across sampling rates ($250\text{--}2000\text{ Hz}$) and noise regimes ($0\text{--}20\text{ N}$) confirming jump height estimation error $< 3.0\text{ mm}$ (95th percentile).
+* 📄 **Detailed Documentation**: [`p1_nmt_pipeline/README.md`](p1_nmt_pipeline/README.md)
+
+---
+
+### Project 2: Baselines, Readiness & SQL Reporting Engine (`p2_nmt_reports`)
+*Longitudinal monitoring engine calculating personal rolling baselines, athlete variability bounds, and composite readiness scores in both Python and standard SQL.*
+
+* **Rolling Personal Baselines**: 28-day backward-looking calendar baseline with a strict minimum guardrail ($N \ge 3$ sessions) to prevent over-reacting to sparse early entries.
+* **Smallest Worthwhile Change (SWC)**: Dynamically calculated per athlete ($\text{SWC} = 0.5 \times \text{SD}_{\text{within}}$, [Hopkins, 2004](https://doi.org/10.1016/j.jsams.2004.04.001)) alongside Typical Error of measurement ($\text{TE} = \text{SD} / \sqrt{2}$).
+* **Direction-Aware Readiness Index**: Standardized $z$-scoring respecting metric directions ($+z$ always represents favorable performance, properly inverting metrics where lower is better like contact times).
+* **DuckDB SQL Window Layer**: Complete analytical parity between Python/Pandas and DuckDB SQL window functions (`OVER (PARTITION BY athlete_id ORDER BY session_date RANGE BETWEEN INTERVAL 28 DAYS PRECEDING...)`), verified down to $|\Delta| < 10^{-6}$.
+* **Within-Athlete Linear Mixed-Effects Model**: Quantifies true session-to-session variance and derives athlete-specific Minimal Detectable Change ($\text{MDC}_{95}$) thresholds.
+* 📄 **Detailed Documentation**: [`p2_nmt_reports/README.md`](p2_nmt_reports/README.md)
+
+---
+
+### Project 3: Wearable Recovery & Mixed-Effects Profiler (`p3_nmt_profiler`)
+*Pre-registered longitudinal investigation of wearable sleep duration, nocturnal resting heart rate (RHR), and training strain predicting next-day readiness and fatigue.*
+
+* **Dataset**: PMData open wearable benchmark ([Thambawita et al., 2020](https://doi.org/10.1145/3339825.3394926)), spanning 16 adults tracked continuously over 5 months (~2,400 participant-days).
+* **Within-Person Centering (Currie / Hoffmann Method)**: Isolates acute day-to-day fluctuations ($X_{it} - \bar{X}_i$) from chronic between-athlete traits ($\bar{X}_i$), eliminating ecological fallacy and cross-sectional confounding.
+* **Linear Mixed-Effects Models (LMM)**: Formulated with random intercepts per participant (`statsmodels.formula.api.mixedlm` via REML):
+  * **Readiness Model**: Acute sleep duration significantly boosts next-day morning readiness ($\beta = +0.218, p < 0.001, 95\%\text{ CI: }[+0.126, +0.310]$).
+  * **Soreness Model**: Acute training strain elevates next-day muscle soreness ($\beta = -0.129, p < 0.001$), with sleep acting as an acute recovery buffer ($\beta = +0.103, p = 0.009$).
+* **Cross-Language Validation (Python $\leftrightarrow$ R)**: Independent execution via R `lme4::lmer` with exact unrounded parameter comparisons confirming model convergence and Wald parameter estimates.
+* **Bilateral Asymmetry & Fatigue Sensitivity**: Bilateral Asymmetry Index ($\text{BAI}$), Limb Symmetry Index ($\text{LSI}$), persistence tracking ($\ge 75\%$), and fatigue sensitivity slopes.
+* 📄 **Detailed Documentation**: [`p3_nmt_profiler/README.md`](p3_nmt_profiler/README.md) & [`p3_nmt_profiler/ANALYSIS_PLAN.md`](p3_nmt_profiler/ANALYSIS_PLAN.md)
+
+---
+
+## Summary of Analytical Methods
+
+| Module | Core Statistical / Engineering Method | Primary Reference | Ground-Truth Test |
+| :--- | :--- | :--- | :--- |
+| **`p1_nmt_pipeline`** | Trapezoidal Impulse-Momentum Integration | McMahon et al. (2018) | `test_cmj_analytical_ground_truth` |
+| **`p1_nmt_pipeline`** | Zero-phase 4th-order Butterworth Filter | Winter (2009) | `test_filter_zero_phase_alignment` |
+| **`p2_nmt_reports`** | Rolling SWC & Typical Error | Hopkins (2000, 2004) | `test_rolling_baseline_math_and_swc` |
+| **`p2_nmt_reports`** | DuckDB SQL Window Functions | ISO/IEC 9075 SQL:2016 | `test_sql_rolling_baselines_matches_pandas_exact` |
+| **`p3_nmt_profiler`** | Person-Mean Centered Mixed-Effects Models | Currie (2019), Hoffmann (2019) | `test_model_1_readiness` |
+| **`p3_nmt_profiler`** | Multi-Language Validation (Python vs R) | Bates et al. (2015, `lme4`) | `p3_nmt_profiler/r_crosscheck.R` |
+
+---
+
+## Getting Started & Reproducibility
+
+### 1. Installation
+Clone the repository and set up a virtual environment:
+
+```bash
+git clone https://github.com/yashvi2003/Performance-science--portfolio.git
+cd Performance-science--portfolio
+
+# Create virtual environment (Python 3.11+)
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -e .
+```
+
+### 2. Run Test Suite
+Run the full 100-test suite verifying analytical ground truths, mathematical formulas, SQL parity, and statistical models:
+
+```bash
+pytest
+```
+
+### 3. Generate Reports & Visualizations
+Regenerate all figures, summary tables, and research cards:
+
+```bash
+# Run Project 1 Single Trial CMJ Report
+python scripts/generate_single_trial_report.py
+
+# Run Project 2 Longitudinal Baselines & SQL Engine
+python p2_nmt_reports/charts.py
+
+# Run Project 3 Wearable Modeling & Evidence Figures
+python p3_nmt_profiler/figures.py
+```
+
+---
+
+## Data Privacy, Provenance & Open Science
+
+* **Data Provenance**: Fully documented in [`DATA_SOURCES.md`](DATA_SOURCES.md). Open datasets include PMData (Fitbit/Garmin wearable telemetry, CC BY 4.0) and White et al. (Open force plate CMJ dataset, CC BY 4.0).
+* **Data Hygiene**: Real human participant raw files and proprietary spreadsheets are strictly excluded from git tracking via [`.gitignore`](.gitignore). Only de-identified aggregate statistics and synthetic test data are tracked.
+* **Scientific Transparency**: Synthetic benchmarks are explicitly designated with `[Synthetic Data]` markers on all generated figures. The composite readiness index is documented as an unvalidated heuristic composite. Alerts and flags are characterized as "possible fatigue flags", not diagnostic determinations.

@@ -34,9 +34,9 @@ metric names and units are defined once in `shared/contract.py` (a registry with
 | sleep_hours   | float | |
 | proxy_used    | str   | empty if native; otherwise which fields were proxied and how |
 
-Field names mirror publicly documented WHOOP metrics so a WHOOP export could be adapted later, but NO WHOOP
-device or WHOOP data is used in this portfolio. Any source (public wearable datasets, synthetic) must be converted to this
-schema by an adapter. Missing fields stay NaN. Adapters document every mapping and every proxy.
+Field names mirror standard commercial wearable metrics (recovery %, HRV, resting HR, strain proxy, sleep duration).
+Any source (public wearable datasets, synthetic) is converted to this schema by an adapter. Missing fields stay NaN.
+Adapters document every mapping and every proxy used.
 
 ## Synthetic data (shared/synth.py)
 - `make_force_trial(test, ...)`: physically consistent force-time trial with KNOWN jump height

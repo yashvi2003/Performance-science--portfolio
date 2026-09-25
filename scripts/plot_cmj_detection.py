@@ -369,15 +369,11 @@ def main():
     plt.tight_layout(rect=[0, 0, 0.88, 0.998])
 
     # Save figure
-    art_dir = Path(r"C:\Users\user\.gemini\antigravity-ide\brain\d1ca1bcf-817b-4754-939e-431a45ae1bd0")
-    out_art = art_dir / "cmj_five_trials_detection.png"
     out_local = Path("reports/figures/cmj_five_trials_detection.png")
     out_local.parent.mkdir(parents=True, exist_ok=True)
-
-    fig.savefig(out_art, dpi=200, bbox_inches="tight")
     fig.savefig(out_local, dpi=200, bbox_inches="tight")
     plt.close(fig)
-    print(f"Figure saved to:\n  {out_art}\n  {out_local}")
+    print(f"Figure saved to {out_local}")
 
 
 if __name__ == "__main__":

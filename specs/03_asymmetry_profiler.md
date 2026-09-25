@@ -5,7 +5,7 @@ and fatigue module for jump data. Only the shared contract couples it to
 other projects.
 
 ## Data plan (important)
-- No WHOOP device or WHOOP data is available; the wearable side is a public dataset or synthetic.
+- The wearable analytics utilize open-access datasets (e.g. PMData) and contract-compliant synthetic benchmarks.
 - Mechanical side (per-limb): first check whether the user's 10-athlete CMJ set has left/right force
   columns. If yes, use it (de-identified) for real asymmetry. If it only has total force, asymmetry
   cannot be computed from it; say so and do not impute.

@@ -10,10 +10,10 @@ import numpy as np
 
 from shared.synth import make_cmj_trial
 
-# Output path in artifacts directory
-artifact_dir = Path(r"C:\Users\user\.gemini\antigravity-ide\brain\6e3673ef-b875-445b-8c76-f4561f0f03df")
-artifact_dir.mkdir(parents=True, exist_ok=True)
-plot_path = artifact_dir / "synthetic_cmj_comparison.png"
+# Output path in reports directory
+output_dir = Path("reports/figures")
+output_dir.mkdir(parents=True, exist_ok=True)
+plot_path = output_dir / "synthetic_cmj_comparison.png"
 
 # Generate the three trials
 cmj_2000 = make_cmj_trial(body_mass_kg=75.0, target_jump_height_m=0.35, fs_hz=2000.0, noise_sd_n=0.0)
