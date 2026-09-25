@@ -38,7 +38,7 @@ portfolio/
 *Longitudinal monitoring engine calculating personal rolling baselines, athlete variability bounds, and composite readiness scores in both Python and standard SQL.*
 
 * **Rolling Personal Baselines**: 28-day backward-looking calendar baseline with a strict minimum guardrail ($N \ge 3$ sessions) to prevent over-reacting to sparse early entries.
-* **Smallest Worthwhile Change (SWC)**: Dynamically calculated per athlete ($\text{SWC} = 0.5 \times \text{SD}_{\text{within}}$, [Hopkins, 2004](https://doi.org/10.1016/j.jsams.2004.04.001)) alongside Typical Error of measurement ($\text{TE} = \text{SD} / \sqrt{2}$).
+* **Smallest Worthwhile Change (SWC)**: Dynamically calculated per athlete ($\text{SWC} = 0.5 \times \text{SD}_{\text{within}}$, [Hopkins, 2004](https://www.sportsci.org/jour/04/wghtests.htm)) alongside Typical Error of measurement ($\text{TE} = \text{SD} / \sqrt{2}$, [Hopkins, 2000](https://pubmed.ncbi.nlm.nih.gov/10966148/)).
 * **Direction-Aware Readiness Index**: Standardized $z$-scoring respecting metric directions ($+z$ always represents favorable performance, properly inverting metrics where lower is better like contact times).
 * **DuckDB SQL Window Layer**: Complete analytical parity between Python/Pandas and DuckDB SQL window functions (`OVER (PARTITION BY athlete_id ORDER BY session_date RANGE BETWEEN INTERVAL 28 DAYS PRECEDING...)`), verified down to $|\Delta| < 10^{-6}$.
 * **Within-Athlete Linear Mixed-Effects Model**: Quantifies true session-to-session variance and derives athlete-specific Minimal Detectable Change ($\text{MDC}_{95}$) thresholds.
