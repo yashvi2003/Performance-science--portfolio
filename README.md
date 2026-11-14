@@ -119,3 +119,15 @@ python p3_nmt_profiler/figures.py
 * **Data Provenance**: Fully documented in [`DATA_SOURCES.md`](DATA_SOURCES.md). Open datasets include PMData (Fitbit/Garmin wearable telemetry, CC BY 4.0) and White et al. (Open force plate CMJ dataset, CC BY 4.0).
 * **Data Hygiene**: Real human participant raw files and proprietary spreadsheets are strictly excluded from git tracking via [`.gitignore`](.gitignore). Only de-identified aggregate statistics and synthetic test data are tracked.
 * **Scientific Transparency**: Synthetic benchmarks are explicitly designated with `[Synthetic Data]` markers on all generated figures. The composite readiness index is documented as an unvalidated heuristic composite. Alerts and flags are characterized as "possible fatigue flags", not diagnostic determinations.
+
+---
+
+## Limitations
+
+* **1D Vertical Kinetics Only**: The force plate engine models vertical ground reaction force ($F_z$) exclusively; anterior-posterior ($F_y$) and medial-lateral ($F_x$) shear forces, center of pressure excursions, and multi-axis torque dynamics are outside current pipeline scope.
+* **Modalities Deferred**: The codebase implements countermovement jump (CMJ) phase detection and metrics; squat jump (SJ), drop jump (DJ), isometric mid-thigh pull (IMTP) metrics, jump-type classifiers, and interactive Streamlit UI dashboards were deferred to prioritize core longitudinal modeling.
+* **Project 2 Synthetic Demonstration**: Project 2 longitudinal baselines and readiness scoring run on synthetic multi-session data (`shared/synth.py`) as a local batch computation demo, not an active streaming or real-time athlete monitoring system.
+* **Cohort Scope & Observational Design**: Project 3 is observational across 16 physically active adults in free-living conditions (~2,400 participant-days) rather than an elite competitive cohort; associations cannot establish causality, and unmeasured confounders (e.g., life stress, alcohol, training specifics) remain unobserved.
+* **No Autonomic Biomarkers in Wearable Cohort**: The PMData cohort relies on optical PPG resting heart rate and self-report wellness surveys without vagal heart rate variability time series (rMSSD is unrecorded/NaN), limiting autonomic recovery resolution.
+* **Disjoint Datasets (No Single End-to-End Athlete Pipeline)**: Project 1 evaluates jump force-time series (White et al. open data and 10 single-trial recordings), Project 2 demonstrates longitudinal SQL window transformations on synthetic sessions, and Project 3 investigates PMData wearable telemetry; no single athletic cohort spans all three modules end-to-end.
+* **Composite Readiness as an Unvalidated Heuristic**: The weighted composite readiness score is an exploratory pedagogical heuristic and must not be interpreted as a validated clinical or diagnostic metric. Alert flags denote "possible fatigue flags", not formal interventions.
