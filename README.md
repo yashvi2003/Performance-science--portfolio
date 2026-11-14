@@ -26,7 +26,7 @@ portfolio/
 ---
 
 ### Project 1: Automatic Jump Analysis Engine (`p1_nmt_pipeline`)
-*Automated force-time curve partitioning, event detection, and impulse-momentum numerical integration adhering to consensus standards ([McMahon et al., 2018](https://doi.org/10.1519/SSC.0000000000000377)).*
+*Automated force-time curve partitioning, event detection, and impulse-momentum numerical integration following the phase definitions of McMahon et al. (2018).*
 
 * **Automated Phase Segmentation**: Detection of Quiet-standing baseline, Unweighting trough, Zero-velocity transition ($v(t)=0$), Peak propulsion force, Takeoff, Flight floor, and Landing absorption impact.
 * **Core Metrics**: Impulse-momentum jump height, flight-time jump height, Modified Reactive Strength Index ($\text{RSImod} = \text{JH} / \text{Time to Takeoff}$), peak power via trapezoidal integration, and concentric/eccentric duration ratios.
@@ -46,7 +46,7 @@ portfolio/
 * **Smallest Worthwhile Change (SWC)**: Dynamically calculated per athlete ($\text{SWC} = 0.5 \times \text{SD}_{\text{within}}$, [Hopkins, 2004](https://www.sportsci.org/jour/04/wghtests.htm)) alongside Typical Error of measurement ($\text{TE} = \text{SD} / \sqrt{2}$, [Hopkins, 2000](https://pubmed.ncbi.nlm.nih.gov/10966148/)).
 * **Direction-Aware Readiness Index**: Standardized $z$-scoring respecting metric directions ($+z$ always represents favorable performance, properly inverting metrics where lower is better like contact times).
 * **DuckDB SQL Window Layer**: Complete analytical parity between Python/Pandas and DuckDB SQL window functions (`OVER (PARTITION BY athlete_id ORDER BY session_date RANGE BETWEEN INTERVAL 28 DAYS PRECEDING...)`), verified down to $|\Delta| < 10^{-6}$.
-* **Within-Athlete Linear Mixed-Effects Model**: Quantifies true session-to-session variance and derives athlete-specific Minimal Detectable Change ($\text{MDC}_{95}$) thresholds.
+* **Within-Athlete Linear Mixed-Effects Model [synthetic data]**: Estimates session-to-session variance and derives athlete-specific Minimal Detectable Change ($\text{MDC}_{95}$) thresholds.
 * 📄 **Detailed Documentation**: [`p2_nmt_reports/README.md`](p2_nmt_reports/README.md)
 
 ---
@@ -55,7 +55,7 @@ portfolio/
 *Longitudinal investigation of wearable sleep duration, nocturnal resting heart rate (RHR), and training strain predicting next-day readiness and fatigue, with hypotheses and model specifications documented in [`ANALYSIS_PLAN.md`](p3_nmt_profiler/ANALYSIS_PLAN.md) before modelling.*
 
 * **Dataset**: PMData open wearable benchmark ([Thambawita et al., 2020](https://doi.org/10.1145/3339825.3394926)), spanning 16 adults tracked continuously over 5 months (2,080 daily records in `data/processed/wearable_daily.csv`; Model 1: $n=1,368$ across 15 participants; Model 2: $n=1,716$ across 16 participants; Model 3: $n=1,369$ across 15 participants; sensor-matched complete cases).
-* **Within-Person Centering (Currie / Hoffmann Method)**: Isolates acute day-to-day fluctuations ($X_{it} - \bar{X}_i$) from chronic between-athlete traits ($\bar{X}_i$), eliminating ecological fallacy and cross-sectional confounding.
+* **Within-Person Centering (Currie / Hoffmann Method)**: Isolates acute day-to-day fluctuations ($X_{it} - \bar{X}_i$) from chronic between-athlete traits ($\bar{X}_i$), separating within-person from between-person variation without removing unmeasured confounding.
 * **Linear Mixed-Effects Models (LMM)**: Formulated with random intercepts per participant (`statsmodels.formula.api.mixedlm` via REML), with random slopes evaluated for standardized acute sleep deviation via Likelihood Ratio Test comparing ML fits ($\chi^2(2) = 32.02, p < 0.001$, estimated slope variance $\sigma_{u1}^2 = 0.122$ with random intercept-slope covariance):
   * **Readiness Model**: Acute sleep duration is positively associated with next-day morning readiness ($\beta = +0.218, p < 0.001, 95\%\text{ CI: }[+0.139, +0.297]$; readiness scale 1–10, higher is more ready).
   * **Soreness Model**: Acute training strain is associated with greater next-day muscle soreness ($\beta = -0.129, p < 0.001, 95\%\text{ CI: }[-0.156, -0.103]$; PMSys soreness scale 1–5, where 1=very sore and 5=fresh, so negative $\beta$ indicates greater soreness). Acute sleep duration was not significantly associated with soreness ($\beta = +0.005, p = 0.694$).
@@ -138,7 +138,7 @@ python p3_nmt_profiler/figures.py
 * **Licence**: Code is released under the [MIT License](LICENSE). Third-party datasets retain their respective original licences and terms of use (see [`DATA_SOURCES.md`](DATA_SOURCES.md)). Note that derived files in `data/processed/` generated from PMData (`wearable_daily.csv`, `p3_model1_dataset.csv`, `p3_model1_py_results.csv`) may carry the dataset's non-commercial licensing terms (CC BY-NC 4.0), separate from the MIT licence governing the source code.
 * **Data Provenance**: Fully documented in [`DATA_SOURCES.md`](DATA_SOURCES.md). Open datasets include PMData (Fitbit Versa 2 and PMSys logging, licensed under CC BY-NC 4.0 per OSF `license.txt`; portal states CC BY 4.0) and White et al. (Open force plate CMJ dataset, CC BY 4.0).
 * **Data Hygiene**: Real human participant raw files and proprietary spreadsheets are strictly excluded from git tracking via [`.gitignore`](.gitignore). Only de-identified aggregate statistics and synthetic test data are tracked.
-* **Scientific Transparency**: Synthetic benchmarks are explicitly designated with `[Synthetic Data]` markers on all generated figures. The composite readiness index is documented as an unvalidated heuristic composite. Alerts and flags are characterized as "possible fatigue flags", not diagnostic determinations.
+* **Scientific Transparency**: Synthetic benchmarks are explicitly designated with `[Synthetic Data]` markers on all generated figures. The composite readiness index is documented as an unvalidated heuristic composite. Acute-drop flags and recovery deficit tags (e.g., $z < -1.0$ or $\Delta\% < -10\%$) are characterized as "possible fatigue flags", not diagnostic determinations. Multi-tier alert rules are deferred to future work.
 
 ---
 
