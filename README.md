@@ -1,6 +1,6 @@
 # Sports Performance & Biomechanics Analytics Toolkit
 
-[![Tests](https://img.shields.io/badge/pytest-100%20passed-success)](tests/)
+[![Tests](https://github.com/yashvi2003/Performance-science--portfolio/actions/workflows/tests.yml/badge.svg)](https://github.com/yashvi2003/Performance-science--portfolio/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![SQL Engine](https://img.shields.io/badge/SQL-DuckDB-orange)](p2_nmt_reports/sql/)
 [![Stats](https://img.shields.io/badge/models-Linear%20Mixed--Effects%20(Python%20%2B%20R)-purple)](p3_nmt_profiler/)
