@@ -135,8 +135,8 @@ python p3_nmt_profiler/figures.py
 
 ## Data Privacy, Provenance & Open Science
 
-* **Licence**: Code is released under the [MIT License](LICENSE). Third-party datasets retain their respective original licences and terms of use (see [`DATA_SOURCES.md`](DATA_SOURCES.md)).
-* **Data Provenance**: Fully documented in [`DATA_SOURCES.md`](DATA_SOURCES.md). Open datasets include PMData (Fitbit/Garmin wearable telemetry, CC BY 4.0) and White et al. (Open force plate CMJ dataset, CC BY 4.0).
+* **Licence**: Code is released under the [MIT License](LICENSE). Third-party datasets retain their respective original licences and terms of use (see [`DATA_SOURCES.md`](DATA_SOURCES.md)). Note that derived files in `data/processed/` generated from PMData (`wearable_daily.csv`, `p3_model1_dataset.csv`, `p3_model1_py_results.csv`) may carry the dataset's non-commercial licensing terms (CC BY-NC 4.0), separate from the MIT licence governing the source code.
+* **Data Provenance**: Fully documented in [`DATA_SOURCES.md`](DATA_SOURCES.md). Open datasets include PMData (Fitbit Versa 2 and PMSys logging, licensed under CC BY-NC 4.0 per OSF `license.txt`; portal states CC BY 4.0) and White et al. (Open force plate CMJ dataset, CC BY 4.0).
 * **Data Hygiene**: Real human participant raw files and proprietary spreadsheets are strictly excluded from git tracking via [`.gitignore`](.gitignore). Only de-identified aggregate statistics and synthetic test data are tracked.
 * **Scientific Transparency**: Synthetic benchmarks are explicitly designated with `[Synthetic Data]` markers on all generated figures. The composite readiness index is documented as an unvalidated heuristic composite. Alerts and flags are characterized as "possible fatigue flags", not diagnostic determinations.
 
