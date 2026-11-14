@@ -82,13 +82,28 @@ Clone the repository and set up a virtual environment:
 ```bash
 git clone https://github.com/yashvi2003/Performance-science--portfolio.git
 cd Performance-science--portfolio
+```
 
+**Option A: Using `uv` (Recommended)**
+```bash
+# Sync dependencies into local virtual environment
+uv sync
+
+# Run tests
+uv run pytest
+```
+
+**Option B: Standard `pip` and `venv`**
+```bash
 # Create virtual environment (Python 3.11+)
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install dependencies
 pip install -e .
+
+# Run tests
+pytest
 ```
 
 ### 2. Run Test Suite
