@@ -29,7 +29,7 @@ portfolio/
 * **Automated Phase Segmentation**: Detection of Quiet-standing baseline, Unweighting trough, Zero-velocity transition ($v(t)=0$), Peak propulsion force, Takeoff, Flight floor, and Landing absorption impact.
 * **Core Metrics**: Impulse-momentum jump height, flight-time jump height, Modified Reactive Strength Index ($\text{RSImod} = \text{JH} / \text{Time to Takeoff}$), peak power via trapezoidal integration, and concentric/eccentric duration ratios.
 * **Signal Robustness & Flight Sensor Offsets**: Zero-phase low-pass Butterworth filtering, adaptive noise-floor calibration, and sub-sample extrapolation to eliminate threshold truncation biases.
-* **Validation**: Monte Carlo accuracy testing across sampling rates ($250\text{--}2000\text{ Hz}$) and noise regimes ($0\text{--}20\text{ N}$) confirming jump height estimation error $< 3.0\text{ mm}$ (95th percentile).
+* **Validation**: Monte Carlo accuracy testing (N=200 trials per condition, 9 conditions) across sampling rates ($250\text{--}2000\text{ Hz}$) and noise regimes ($0\text{--}20\text{ N}$) confirming impulse-momentum jump height estimation error $< 6.0\text{ mm}$ at $2000\text{ Hz}$ and $< 12.0\text{ mm}$ at $250\text{ Hz}$ (95th percentile), on synthetic force-time curves with realistic 20 ms cosine-ramp onsets and $\pm 15\text{ ms}$ event jitter.
 * 📄 **Detailed Documentation**: [`p1_nmt_pipeline/README.md`](p1_nmt_pipeline/README.md)
 
 ---
