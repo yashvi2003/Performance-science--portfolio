@@ -5,7 +5,7 @@
 [![SQL Engine](https://img.shields.io/badge/SQL-DuckDB-orange)](p2_nmt_reports/sql/)
 [![Stats](https://img.shields.io/badge/models-Linear%20Mixed--Effects%20(Python%20%2B%20R)-purple)](p3_nmt_profiler/)
 
-An applied sports performance engineering and data science portfolio containing three modular, production-tested pipelines for **force-plate jump biomechanics**, **SQL longitudinal readiness baselines**, and **longitudinal wearable recovery modeling**.
+An applied sports performance engineering and data science portfolio containing three modular, tested pipelines for **force-plate jump biomechanics**, **SQL longitudinal readiness baselines**, and **longitudinal wearable recovery modeling**.
 
 ---
 
