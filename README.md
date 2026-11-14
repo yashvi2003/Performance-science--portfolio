@@ -52,9 +52,9 @@ portfolio/
 
 * **Dataset**: PMData open wearable benchmark ([Thambawita et al., 2020](https://doi.org/10.1145/3339825.3394926)), spanning 16 adults tracked continuously over 5 months (~2,400 participant-days).
 * **Within-Person Centering (Currie / Hoffmann Method)**: Isolates acute day-to-day fluctuations ($X_{it} - \bar{X}_i$) from chronic between-athlete traits ($\bar{X}_i$), eliminating ecological fallacy and cross-sectional confounding.
-* **Linear Mixed-Effects Models (LMM)**: Formulated with random intercepts per participant (`statsmodels.formula.api.mixedlm` via REML):
-  * **Readiness Model**: Acute sleep duration significantly boosts next-day morning readiness ($\beta = +0.218, p < 0.001, 95\%\text{ CI: }[+0.126, +0.310]$).
-  * **Soreness Model**: Acute training strain elevates next-day muscle soreness ($\beta = -0.129, p < 0.001$), with sleep acting as an acute recovery buffer ($\beta = +0.103, p = 0.009$).
+* **Linear Mixed-Effects Models (LMM)**: Formulated with random intercepts per participant (`statsmodels.formula.api.mixedlm` via REML), with random sleep slopes evaluated via Likelihood Ratio Test ($\chi^2(2) = 32.02, p < 0.001$):
+  * **Readiness Model**: Acute sleep duration is positively associated with next-day morning readiness ($\beta = +0.218, p < 0.001, 95\%\text{ CI: }[+0.139, +0.297]$; readiness scale 1–10, higher is more ready).
+  * **Soreness Model**: Acute training strain is associated with greater next-day muscle soreness ($\beta = -0.129, p < 0.001, 95\%\text{ CI: }[-0.156, -0.103]$; PMSys soreness scale 1–5, where 1=very sore and 5=fresh, so negative $\beta$ indicates greater soreness). Acute sleep duration was not significantly associated with soreness ($\beta = +0.005, p = 0.694$).
 * **Cross-Language Validation (Python $\leftrightarrow$ R)**: Independent execution via R `lme4::lmer` with exact unrounded parameter comparisons confirming model convergence and Wald parameter estimates.
 * **Bilateral Asymmetry & Fatigue Sensitivity**: Bilateral Asymmetry Index ($\text{BAI}$), Limb Symmetry Index ($\text{LSI}$), persistence tracking ($\ge 75\%$), and fatigue sensitivity slopes.
 * 📄 **Detailed Documentation**: [`p3_nmt_profiler/README.md`](p3_nmt_profiler/README.md) & [`p3_nmt_profiler/ANALYSIS_PLAN.md`](p3_nmt_profiler/ANALYSIS_PLAN.md)
