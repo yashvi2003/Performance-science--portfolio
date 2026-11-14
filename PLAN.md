@@ -21,7 +21,7 @@ This toolkit is designed as a research-grade neuromuscular and physiological mon
 
 ---
 
-## 2. Repository File Tree
+## 2. Repository File Tree (Implemented vs Deferred)
 
 ```
 portfolio-agent-kit/                # Single repository root (workspace root)
@@ -41,6 +41,9 @@ portfolio-agent-kit/                # Single repository root (workspace root)
 ├── scripts/
 │   ├── progress.py                 # Terminal progress tracker parsed from STATUS.md
 │   ├── import_cmj_xlsx.py          # De-identifies & imports professor Excel files to CSV
+│   ├── fetch_pmdata_summaries.py   # Ingests PMData summaries from OSF
+│   ├── generate_single_trial_report.py # Generates VALD-style CMJ diagnostic report
+│   ├── generate_p3_figures.py      # Generates Project 3 figures
 │   └── run_all.py                  # End-to-end execution script reproducing all figures
 ├── shared/
 │   ├── __init__.py
@@ -49,47 +52,41 @@ portfolio-agent-kit/                # Single repository root (workspace root)
 ├── p1_nmt_pipeline/                # PROJECT 1: Automatic Jump Analysis Engine
 │   ├── __init__.py
 │   ├── config.yaml                 # Tunable thresholds, filter cutoffs, integration lead, offset flags
+│   ├── config.py                   # Configuration dataclass loaders
 │   ├── filter.py                   # 4th-order zero-phase Butterworth filter (scipy.signal)
 │   ├── events.py                   # Phase detection (quiet baseline, onset, unweight, brake, prop, TO, land)
 │   ├── metrics.py                  # Impulse-momentum, flight-time, RSImod, power, velocity
-│   ├── classifier.py               # Rule-based explainable jump-type classifier (CMJ/SJ/DJ/IMTP/unknown)
-│   ├── sj.py                       # Squat jump metrics & countermovement invalidation
-│   ├── dj.py                       # Drop jump metrics (GCT, flight time, RSI)
-│   ├── imtp.py                     # Isometric mid-thigh pull metrics (Stretch Goal S3)
-│   ├── validation.py               # Bland-Altman LoA, sensitivity grid, golden test, open data adapter
-│   ├── report.py                   # VALD-style multi-panel figure generator & HTML export
-│   ├── app.py                      # Streamlit drop-a-file app
+│   ├── open_data_adapter.py        # White et al. Zenodo npz data loader
+│   ├── reliability.py              # Reliability metrics (ICC, CV%, SEM, MDC)
+│   ├── validator.py                # Data validation & resampling
 │   └── cli.py                      # Batch processor outputting shared sessions.csv
+│   # Note: classifier.py, sj.py, dj.py, imtp.py, app.py deferred per STATUS.md
 ├── p2_nmt_reports/                 # PROJECT 2: Baselines, Readiness & SQL Layer
 │   ├── __init__.py
 │   ├── config.yaml                 # Baseline window (28d), alert thresholds, readiness weights
+│   ├── config.py                   # Configuration loaders
 │   ├── loader.py                   # Shared contract loader & validator
 │   ├── sql/                        # SQL layer with DuckDB
 │   │   ├── schema.sql              # Table definitions for DuckDB/SQLite
 │   │   ├── rolling_baselines.sql   # Window functions for 28-day rolling mean & SD
-│   │   ├── session_aggregates.sql  # Best trial & session means
-│   │   └── readiness_join.sql      # Wearable date-join & alert view
+│   │   └── session_aggregates.sql  # Best trial & session means
 │   ├── sql_engine.py               # Python-DuckDB executor & Pandas equivalence tests
 │   ├── baselines.py                # Rolling personal baselines, typical error & SWC
 │   ├── readiness.py                # Direction-aware z-scores & composite heuristic readiness
 │   ├── wearable.py                 # Wearable ingestion, date matching & recovery overlay
-│   ├── alerts.py                   # Multi-tier alert logic (SWC, red zones, multi-metric decline)
 │   ├── stats.py                    # Mixed-effects session-to-session change model (statsmodels)
-│   ├── report.py                   # Self-contained HTML/PDF longitudinal report generator
-│   └── app.py                      # Streamlit longitudinal athlete dashboard
+│   └── charts.py                   # Publication-ready longitudinal baseline and readiness plots
+│   # Note: alerts.py, report.py, app.py deferred per STATUS.md
 ├── p3_nmt_profiler/                # PROJECT 3: Real-World Evidence & Asymmetry Profiler
 │   ├── __init__.py
 │   ├── config.yaml                 # Wearable column mappings, asymmetry thresholds
-│   ├── ANALYSIS_PLAN.md            # Preregistered research questions, hypotheses & DAG
-│   ├── adapters/                   # Wearable adapters (e.g. PMData Fitbit/PMSys to contract)
-│   │   ├── base.py
-│   │   └── pmdata.py
-│   ├── models.py                   # Mixed-effects regression (within-person vs between-person)
-│   ├── causal.py                   # DAG construction, confounder adjustment & sensitivity analysis
-│   ├── asymmetry.py                # Bilateral symmetry index ((H - L)/H * 100), persistence flag
-│   ├── fatigue.py                  # Training strain vs mechanical readiness & lagged correlations
-│   ├── figures.py                  # Dual-axis longitudinal strain vs readiness publication plots
-│   └── brief.py                    # Two-page executive research brief generator (HTML/PDF)
+│   ├── config.py                   # Configuration loaders
+│   ├── ANALYSIS_PLAN.md            # Documented research questions, hypotheses & DAG
+│   ├── pmdata_adapter.py           # Wearable adapter mapping PMData to shared schema
+│   ├── model.py                    # Linear mixed-effects regression & random slopes LRT
+│   ├── sensitivity.py              # Rest-day imputation, trimming, and BLUP slope sensitivities
+│   ├── asymmetry.py                # Bilateral Asymmetry Index (BAI), LSI, persistence & fatigue slopes
+│   └── r_crosscheck.R              # Independent R lme4 cross-validation script
 ├── data/
 │   ├── synthetic/                  # Contract-compliant generated trial and longitudinal data
 │   ├── processed/                  # Derived sessions.csv and wearable_daily.csv
@@ -98,12 +95,16 @@ portfolio-agent-kit/                # Single repository root (workspace root)
 └── tests/
     ├── test_contract.py            # Schema validation & metric registry tests
     ├── test_synth.py               # Analytical property verification of synthetic generator
-    ├── test_p1_pipeline.py         # Filtering, phase detection, metrics accuracy (<1-2mm at 2000Hz)
-    ├── test_p1_classifier.py       # Confusion matrix on synthetic jump types & real CMJ check
-    ├── test_p1_validation.py       # Golden test tolerance & sensitivity bounds
-    ├── test_p2_sql.py              # Exact parity between SQL window queries and Pandas
-    ├── test_p2_readiness.py        # Alert tier trigger accuracy on synthetic test cases
-    └── test_p3_rwe.py              # Recovery of simulated within-person coefficients & asymmetry
+    ├── test_p1_pipeline.py         # Filtering, phase detection, metrics accuracy
+    ├── test_cmj.py                 # Comprehensive CMJ detection & Monte Carlo tolerance tests
+    ├── test_cmj_real.py            # Professor cohort parsing & golden test checks
+    ├── test_cmj_open.py            # White et al. open-data validation & reliability tests
+    ├── test_p2_baselines.py        # Baseline calculation & SWC tests
+    ├── test_p2_readiness.py        # Direction-aware readiness score tests
+    ├── test_p2_sql.py              # Parity between SQL window queries and Pandas
+    ├── test_p3_pmdata.py           # PMData ingestion & schema mapping tests
+    ├── test_p3_model.py            # Linear mixed-effects model estimation & diagnostic tests
+    └── test_p3_asymmetry.py        # Bilateral asymmetry index & persistence tests
 ```
 
 ---
@@ -281,53 +282,53 @@ Transparent, deterministic feature tree:
 
 ## 6. Implementation Roadmap & Milestones
 
-### Phase 0: Project Setup & Shared Contracts (Active Milestone)
-- [ ] Move inner files up to workspace root `portfolio-agent-kit/`, remove empty `portfolio/` folder, confirm root contents, and initialize single git repository.
-- [ ] Establish `pyproject.toml` with Python 3.11+, pin dependencies, configure `pytest` and `ruff`.
-- [ ] Install `uv` via `winget` (`astral-sh.uv`), create local `.venv`, and install dependencies.
-- [ ] Implement `shared/contract.py` with schemas, validators, and complete `MetricRegistry`.
-- [ ] Implement `shared/synth.py` with physically consistent analytical force-time generator (including offset injection and bilateral asymmetry) and session table simulators.
-- [ ] Write `tests/test_contract.py` and `tests/test_synth.py` using sampling-rate-appropriate tolerances ($\le 1\text{--}2 \text{ mm}$ at 2000 Hz, $\le 5\text{--}10 \text{ mm}$ at 250 Hz) and independent analytical ground truth.
-- [ ] Verify `DATA_SOURCES.md` and ensure `scripts/progress.py` functions cleanly.
+### Phase 0: Project Setup & Shared Contracts
+- [x] Establish single repository root and initialize git repository.
+- [x] Establish `pyproject.toml` with Python 3.11+, pin dependencies, configure `pytest` and `ruff`.
+- [x] Install `uv`, create local `.venv`, and install dependencies.
+- [x] Implement `shared/contract.py` with schemas, validators, and complete `MetricRegistry`.
+- [x] Implement `shared/synth.py` with physically consistent analytical force-time generator and session table simulators.
+- [x] Write `tests/test_contract.py` and `tests/test_synth.py` verifying analytical ground truth.
+- [x] Document `DATA_SOURCES.md` and ensure `scripts/progress.py` functions cleanly.
 
 ### Phase 1: Automatic Jump Analysis Engine (`p1_nmt_pipeline`)
-- [ ] **M1a**: Config YAML, input validator, 4th-order zero-phase Butterworth filter.
-- [ ] **M1b**: Synthetic trial generators with analytical ground truth.
-- [ ] **M2a**: CMJ phase detection (quiet baseline, onset, unweight, brake, prop, takeoff, landing).
-- [ ] **M2b**: Kinetic & kinematic metrics ($h_{imp}, h_{flight}, RSImod, P_{peak}, v_{peak}, F_{brake}$) + tests.
-- [ ] **M2c**: Professor data importer adapter (`scripts/import_cmj_xlsx.py`) & data-quality report.
-- [ ] **M2d**: Golden test replicating reference workbook within stated tolerance.
-- [ ] **M2e**: Method comparison ($h_{flight}$ vs $h_{imp}$) Bland-Altman analysis with 95% CIs.
-- [ ] **M2f**: Analyst-choice sensitivity grid on baseline windows, onset $k$, integration lead, cutoff frequencies.
-- [ ] **M2g**: Open data adapter for White et al. (Zenodo 19136480, CC BY 4.0) & reliability ($ICC, CV\%$).
-- [ ] **M3**: Rule-based jump-type classifier (CMJ, SJ, DJ, IMTP, unknown) + confusion matrix.
-- [ ] **M4a**: Squat jump metrics & countermovement invalidation flag.
-- [ ] **M4b**: Drop jump metrics (GCT, RSI, height).
-- [ ] **M5a**: Single-trial report: VALD-style multi-panel figure & HTML export.
-- [ ] **M5b**: Streamlit drop-a-file web application.
-- [ ] **M6a**: CLI generating contract-compliant `sessions.csv`.
-- [ ] **M6b**: Comprehensive README with research questions, methods, and AI disclosure.
+- [x] **M1a**: Config YAML, input validator, 4th-order zero-phase Butterworth filter.
+- [x] **M1b**: Synthetic trial generators with analytical ground truth.
+- [x] **M2a**: CMJ phase detection (quiet baseline, onset, unweight, brake, prop, takeoff, landing).
+- [x] **M2b**: Kinetic & kinematic metrics ($h_{imp}, h_{flight}, RSImod, P_{peak}, v_{peak}, F_{brake}$) + tests.
+- [x] **M2c**: Professor data importer adapter (`scripts/import_cmj_xlsx.py`) & data-quality report.
+- [x] **M2d**: Golden test replicating reference workbook within stated tolerance.
+- [x] **M2e**: Method comparison ($h_{flight}$ vs $h_{imp}$) Bland-Altman analysis with 95% CIs.
+- [x] **M2f**: Analyst-choice sensitivity grid on baseline windows, onset $k$, integration lead, cutoff frequencies.
+- [x] **M2g**: Open data adapter for White et al. (Zenodo 19136480, CC BY 4.0) & reliability ($ICC, CV\%$).
+- [ ] **M3 [Deferred / Future Work]**: Rule-based jump-type classifier (CMJ, SJ, DJ, IMTP, unknown).
+- [ ] **M4a [Deferred / Future Work]**: Squat jump metrics & countermovement invalidation flag.
+- [ ] **M4b [Deferred / Future Work]**: Drop jump metrics (GCT, RSI, height).
+- [x] **M5a**: Single-trial report: VALD-style multi-panel figure.
+- [ ] **M5b [Deferred / Future Work]**: Streamlit drop-a-file web application.
+- [x] **M6a**: CLI generating contract-compliant `sessions.csv`.
+- [x] **M6b**: Comprehensive README with research questions, methods, and AI disclosure.
 
 ### Phase 2: Baselines, Readiness & SQL Layer (`p2_nmt_reports`)
-- [ ] **M1a**: Loaders via shared contract & 28-day rolling personal baselines.
-- [ ] **M1b**: DuckDB SQL layer with window functions & Pandas equivalence test suite.
-- [ ] **M2a**: Direction-aware readiness index & documented heuristic weights.
-- [ ] **M2b**: Daily wearable telemetry join with standardized recovery metric names.
-- [ ] **M2c**: Multi-tier alert logic (SWC, red zone recovery, multi-metric decline).
-- [ ] **M2d**: Mixed-effects session change model in `statsmodels`.
-- [ ] **M3**: Visualization module (metric vs baseline bands, recovery overlays).
-- [ ] **M4a**: Streamlit longitudinal monitoring dashboard.
-- [ ] **M4b**: Self-contained HTML report export.
-- [ ] **M5**: Comprehensive test suite & Project 2 README.
+- [x] **M1a**: Loaders via shared contract & 28-day rolling personal baselines.
+- [x] **M1b**: DuckDB SQL layer with window functions & Pandas equivalence test suite.
+- [x] **M2a**: Direction-aware readiness index & documented heuristic weights.
+- [x] **M2b**: Daily wearable telemetry join with standardized recovery metric names.
+- [ ] **M2c [Deferred / Future Work]**: Multi-tier alert logic (SWC, red zone recovery, multi-metric decline).
+- [x] **M2d**: Mixed-effects session change model in `statsmodels`.
+- [x] **M3**: Visualization module (metric vs baseline bands, recovery overlays).
+- [ ] **M4a [Deferred / Future Work]**: Streamlit longitudinal monitoring dashboard.
+- [ ] **M4b [Deferred / Future Work]**: Self-contained HTML report export.
+- [x] **M5**: Comprehensive test suite & Project 2 README.
 
 ### Phase 3: Real-World Evidence & Asymmetry Profiler (`p3_nmt_profiler`)
-- [ ] **M1a**: Public wearable data adapters (e.g. PMData) to `wearable_daily.csv` with strain proxies.
-- [ ] **M1b**: Preregistered analysis plan document (`ANALYSIS_PLAN.md`).
-- [ ] **M2**: Mixed-effects regression (within-person vs between-person sleep/load vs readiness).
-- [ ] **M3**: Causal inference framework (DAG, confounder analysis, sensitivity bounds).
-- [ ] **M4**: Asymmetry module ($ASI$, direction, persistence flag).
-- [ ] **M5a**: Longitudinal strain-readiness publication figures & test suite.
-- [ ] **M5b**: Two-page executive research brief formatted for performance science research evaluation.
+- [x] **M1a**: Public wearable data adapters (PMData) to `wearable_daily.csv` with strain proxies.
+- [x] **M1b**: Pre-analysis plan document (`ANALYSIS_PLAN.md`).
+- [x] **M2**: Mixed-effects regression (within-person vs between-person sleep/load vs readiness).
+- [x] **M3**: Causal inference framework (DAG, confounder analysis, sensitivity bounds).
+- [x] **M4**: Asymmetry module ($ASI$, direction, persistence flag on synthetic bilateral data).
+- [x] **M5a**: Longitudinal strain-readiness publication figures & test suite.
+- [x] **M5b**: Two-page executive research brief formatted for performance science research evaluation.
 
 ---
 
