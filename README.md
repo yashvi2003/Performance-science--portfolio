@@ -111,11 +111,22 @@ pytest
 ```
 
 ### 2. Run Test Suite
-Run the full 100-test suite verifying analytical ground truths, mathematical formulas, SQL parity, and statistical models:
+The repository includes 100 automated tests covering biomechanical signal filtering, event detection, impulse integration, SQL parity, and longitudinal mixed-effects models:
 
 ```bash
+# Run the fast automated test suite (91 tests passed, 9 deselected; matches CI):
+pytest -v -m "not slow and not real_data"
+
+# Or run the complete 100-test suite (including Monte Carlo N=200 simulation and local real-data parsing):
 pytest
 ```
+
+*Data Requirements for Tests*:
+* **Fast Tests (91 tests)**: Run completely self-contained using synthetic generators (`shared/synth.py`) and downloaded open PMData/White et al. summaries.
+* **Real-Data Tests (8 tests in `tests/test_cmj_real.py`)**: Marked `@pytest.mark.real_data`; parse local de-identified force-time CSV files (`data/raw/cmj/`) and are automatically skipped if private raw data is absent.
+* **Monte Carlo Accuracy Test (1 test in `tests/test_cmj.py`)**: Marked `@pytest.mark.slow`; evaluates 1,800 synthetic jumps across 9 benchmark conditions with 95th-percentile error assertions.
+* **Open-Data Tests (`tests/test_cmj_open.py`)**: Require `data/raw/Open/cmj_dataset_both.npz` (White et al., Zenodo CC BY 4.0).
+* **PMData Tests (`tests/test_p3_pmdata.py`)**: Require local PMData participant summaries (`data/raw/pmdata/`).
 
 ### 3. Generate Reports & Visualizations
 Regenerate all figures, summary tables, and research cards:
