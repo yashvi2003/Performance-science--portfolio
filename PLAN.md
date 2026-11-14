@@ -264,7 +264,7 @@ Transparent, deterministic feature tree:
   Verified for exact numerical equivalence ($<10^{-9}$ difference) against Pandas in `test_p2_sql.py`.
 
 ### 5.3 Project 3: Real-World Evidence & Mixed-Effects Causal Modeling
-- **Preregistered Hypotheses**:
+- **Analysis Plan Hypotheses**:
   $H_1$: Within an individual, prior-night sleep deficit ($\Delta Sleep < 0$) predicts diminished next-day readiness.
   $H_2$: Within an individual, high acute day strain predicts increased neuromuscular fatigue (lower RSImod).
 - **Within-Person vs Between-Person Separation (Person-Mean Centering)**:

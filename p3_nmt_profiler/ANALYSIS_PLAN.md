@@ -1,8 +1,8 @@
-# Pre-Registered Analysis Plan: Real-World Evidence of Load, Recovery, and Readiness
+# Analysis Plan: Real-World Evidence of Load, Recovery, and Readiness
 
 **Project**: Project 3 (`p3_nmt_profiler`)  
 **Date**: September 2026  
-**Status**: Pre-Registration Prior to Statistical Modeling  
+**Status**: Analysis Plan Written Before Modelling  
 **Primary Dataset**: PMData (Thambawita et al., 2020, ACM MMSys '20; DOI: [10.1145/3339825.3394926](https://doi.org/10.1145/3339825.3394926))  
 **Data Governance**: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0; OSF `license.txt`) / CC BY 4.0 (Simula portal); Participant written informed consent; Norwegian Centre for Research Data (NSD / Sikt) approval.
 
@@ -12,11 +12,11 @@
 
 Athletes and practitioners regularly wear smartwatches to track their sleep, resting heart rate, and training strain in the hope of anticipating readiness to perform or catching early signs of fatigue. However, naive analyses often commit the "ecological fallacy": comparing Athlete A to Athlete B (e.g., noting that fitter athletes generally sleep more and have lower heart rates) tells us very little about what happens *within* an individual athlete on a day-to-day basis. 
 
-In this study, we evaluate 5 months of continuous real-world longitudinal tracking across 16 participants (~2,400 athlete-days) using Fitbit Versa 2 smartwatches and daily PMSys sports wellness logging. Using within-person centered linear mixed-effects models, we isolate true daily fluctuations from chronic between-person baseline traits. Specifically, we test whether getting one extra hour of sleep or an elevated sleep score predicts higher next-day readiness and reduced fatigue, and whether a spike in prior-day training load triggers next-day muscle soreness and readiness dips. Finally, we provide explicit causal directed acyclic graphs (DAGs) and honest scientific boundaries explaining what observational wearable data can and cannot prove.
+In this study, we evaluate 5 months of continuous real-world longitudinal tracking across 16 participants (2,080 processed participant-days) using Fitbit Versa 2 smartwatches and daily PMSys sports wellness logging. Using within-person centered linear mixed-effects models, we isolate true daily fluctuations from chronic between-person baseline traits. Specifically, we test whether getting one extra hour of sleep or an elevated sleep score predicts higher next-day readiness and reduced fatigue, and whether a spike in prior-day training load triggers next-day muscle soreness and readiness dips. Finally, we provide explicit causal directed acyclic graphs (DAGs) and honest scientific boundaries explaining what observational wearable data can and cannot prove.
 
 ---
 
-## 2. Research Questions & Formal Pre-Registered Hypotheses
+## 2. Research Questions & Formal Hypotheses
 
 ### Research Question 1 (Sleep & Next-Day Readiness/Fatigue)
 To what extent do acute within-person deviations in prior-night sleep duration and sleep quality predict next-day subjective readiness and fatigue, independent of an athlete's chronic average sleep habits?
@@ -192,7 +192,7 @@ The following diagnostics will be evaluated and reported in the results:
 
 ---
 
-## 9. Pre-Registered Sensitivity Analyses
+## 9. Planned Sensitivity Analyses
 
 To ensure findings are robust and not artifacts of operational choices:
 1. **Rest-Day Imputation Check**: Compare models where rest days are coded as $\text{Load} = 0.0\text{ AU}$ vs. models dropping unlogged training days.
@@ -203,17 +203,17 @@ To ensure findings are robust and not artifacts of operational choices:
 
 ## 10. Verification & Sign-Off
 
-This analysis plan was pre-registered and committed to version control prior to final model fitting.
+This analysis plan was written before modelling and committed to version control prior to final model fitting.
 
 ---
 
-## 11. Empirical Model Execution & Pre-Registered Hypothesis Testing (Milestone M2)
+## 11. Empirical Model Execution & Hypothesis Testing (Milestone M2)
 
 Following user review and approval, Models 1–3 were fit via REML using `p3_nmt_profiler/model.py` across $n = 1,368\text{--}1,716$ daily observations (15–16 participants).
 
 ### Hypotheses Outcome & Transparent Null Reporting
 
-| Pre-Registered Hypothesis | Predictor Term | Estimated Effect ($\beta$) | $p$-value | 95% Confidence Interval | Outcome / Interpretation |
+| Planned Hypothesis | Predictor Term | Estimated Effect ($\beta$) | $p$-value | 95% Confidence Interval | Outcome / Interpretation |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **$H_{1a}$: Sleep Duration $\to$ Readiness** | $zSleep^{\text{within}}_{it-1}$ | **$+0.218$** | **$<0.001$** | $[+0.139, +0.297]$ | **Supported**: Acute sleep extension is positively associated with morning readiness. |
 | **$H_{1b}$: Sleep Duration $\to$ Soreness** | $zSleep^{\text{within}}_{it-1}$ | $+0.005$ | $0.694$ | $[-0.021, +0.032]$ | **Null / Non-Significant**: Sleep duration does not show a statistically significant acute association with perceived muscle soreness. |

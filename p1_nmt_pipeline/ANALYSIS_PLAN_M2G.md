@@ -3,7 +3,7 @@
 **Author**: Performance Science / Biomechanics Pipeline  
 **Date**: 2026-09-22  
 **Dataset**: White et al. (2022, *PLOS ONE*, DOI: [10.1371/journal.pone.0263846](https://doi.org/10.1371/journal.pone.0263846); Zenodo DOI: [10.5281/zenodo.19136480](https://doi.org/10.5281/zenodo.19136480))  
-**Status**: Pre-registered prior to running reliability calculations.
+**Status**: Analysis plan written before modelling prior to running reliability calculations.
 
 ---
 
@@ -58,7 +58,7 @@ To prevent silent aliasing, the adapter outputs explicit, unambiguous metric nam
 
 ---
 
-## 5. Pre-Registered Balanced Subsets & Denominators
+## 5. Planned Balanced Subsets & Denominators
 
 Every reported reliability statistic must output its raw $N$, trial count, and denominator:
 

@@ -173,9 +173,9 @@ To avoid ambiguous aliasing between flight trajectory height and total center of
 
 ---
 
-### Pre-Registered Reliability Results (With Raw Denominators)
+### Within-Participant Reliability Results (With Raw Denominators)
 
-All reliability calculations report single-measure reliability ($\text{ICC}(\cdot, 1)$), which represents the precision of evaluating an individual jump:
+All reliability calculations report single-measure reliability ($\text{ICC}(\cdot, 1)$), planned prior to analysis, which represents the precision of evaluating an individual jump:
 
 | Condition & Trial Set | Metric | Mean $\pm$ SD | Within-Subject $\text{CV}\%$ | $\text{ICC}(2, 1)$ [95% CI] | $\text{ICC}(3, 1)$ [95% CI] | $\text{SEM}$ | $\text{MDC}_{95}$ |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
