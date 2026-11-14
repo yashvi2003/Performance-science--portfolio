@@ -7,7 +7,7 @@ To what extent do acute day-to-day fluctuations in prior-night sleep duration, n
 
 ## Analysis Plan & Methodology
 
-1. **Pre-Registration**: Documented in [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) prior to statistical modeling.
+1. **Analysis Plan**: Hypotheses and model specifications documented in [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) before modelling.
 2. **Dataset**: PMData (Thambawita et al., 2020, ACM MMSys '20; DOI: [10.1145/3339825.3394926](https://doi.org/10.1145/3339825.3394926)). 16 physically active adults tracked continuously for 5 months (~2,400 participant-days).
 3. **Currie / Hoffmann Person-Mean Centering Decomposition**:
    - Between-person trait means ($\bar{X}_i$)
@@ -18,7 +18,7 @@ To what extent do acute day-to-day fluctuations in prior-night sleep duration, n
    - Model 2: Morning Muscle Soreness ~ Acute Load + Trait Load + Acute Sleep + (1|Athlete)
    - Model 3: Morning Fatigue ~ Acute Sleep Score + Acute Load + Acute RHR + (1|Athlete)
 5. **R Cross-Check Validation**: `p3_nmt_profiler/r_crosscheck.R` independently refits Model 1 via `lme4::lmer` (REML, `nloptwrap`) on `data/processed/p3_model1_dataset.csv`, programmatically comparing results against Python `statsmodels`.
-6. **Bilateral Asymmetry Module**: `p3_nmt_profiler.asymmetry` computes Bilateral Asymmetry Index ($\text{BAI}$), Limb Symmetry Index ($\text{LSI}$), persistence flags ($\ge 75\%$), and fatigue sensitivity slopes.
+6. **Bilateral Asymmetry Module [synthetic data]**: `p3_nmt_profiler.asymmetry` computes Bilateral Asymmetry Index ($\text{BAI}$), Limb Symmetry Index ($\text{LSI}$), persistence flags ($\ge 75\%$), and fatigue sensitivity slopes evaluated on synthetic bilateral trial data (`shared/synth.py`). PMData contains wearable telemetry, not bilateral force plate traces.
 
 ---
 

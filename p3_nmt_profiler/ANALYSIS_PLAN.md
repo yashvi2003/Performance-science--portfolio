@@ -215,11 +215,11 @@ Following user review and approval, Models 1–3 were fit via REML using `p3_nmt
 
 | Pre-Registered Hypothesis | Predictor Term | Estimated Effect ($\beta$) | $p$-value | 95% Confidence Interval | Outcome / Interpretation |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **$H_{1a}$: Sleep Duration $\to$ Readiness** | $zSleep^{\text{within}}_{it-1}$ | **$+0.218$** | **$<0.001$** | $[+0.139, +0.297]$ | **Supported**: Acute sleep extension reliably boosts morning readiness. |
-| **$H_{1b}$: Sleep Duration $\to$ Soreness** | $zSleep^{\text{within}}_{it-1}$ | $+0.005$ | $0.694$ | $[-0.021, +0.032]$ | **Null / Non-Significant**: Sleep duration does not acutely alter perceived muscle soreness. |
-| **$H_{1c}$: Sleep Score $\to$ Energy/Fatigue** | $zSleepScore^{\text{within}}_{it-1}$ | **$+0.143$** | **$<0.001$** | $[+0.110, +0.177]$ | **Supported**: Fitbit sleep quality strongly predicts lower morning fatigue. |
-| **$H_2$: Nocturnal RHR $\to$ Readiness** | $zRHR^{\text{within}}_{it-1}$ | $-0.021$ | $0.606$ | $[-0.099, +0.058]$ | **Null / Non-Significant**: Acute nocturnal RHR elevation does not predict next-day readiness over sleep duration. |
-| **$H_{3a}$: Training Load $\to$ Soreness** | $zLoad^{\text{within}}_{it-1}$ | **$-0.129$** | **$<0.001$** | $[-0.156, -0.103]$ | **Supported**: Prior-day training load significantly elevates muscle soreness (PMSys 1=sore scale). |
+| **$H_{1a}$: Sleep Duration $\to$ Readiness** | $zSleep^{\text{within}}_{it-1}$ | **$+0.218$** | **$<0.001$** | $[+0.139, +0.297]$ | **Supported**: Acute sleep extension is positively associated with morning readiness. |
+| **$H_{1b}$: Sleep Duration $\to$ Soreness** | $zSleep^{\text{within}}_{it-1}$ | $+0.005$ | $0.694$ | $[-0.021, +0.032]$ | **Null / Non-Significant**: Sleep duration does not show a statistically significant acute association with perceived muscle soreness. |
+| **$H_{1c}$: Sleep Score $\to$ Energy/Fatigue** | $zSleepScore^{\text{within}}_{it-1}$ | **$+0.143$** | **$<0.001$** | $[+0.110, +0.177]$ | **Supported**: Fitbit sleep quality is positively associated with lower morning fatigue (higher energy). |
+| **$H_2$: Nocturnal RHR $\to$ Readiness** | $zRHR^{\text{within}}_{it-1}$ | $-0.021$ | $0.606$ | $[-0.099, +0.058]$ | **Null / Non-Significant**: Acute nocturnal RHR elevation does not show a statistically significant association with next-day readiness over sleep duration. |
+| **$H_{3a}$: Training Load $\to$ Soreness** | $zLoad^{\text{within}}_{it-1}$ | **$-0.129$** | **$<0.001$** | $[-0.156, -0.103]$ | **Supported**: Prior-day training load is associated with greater next-day muscle soreness (PMSys 1=sore scale, negative coefficient denotes greater soreness). |
 | **$H_{3b}$: Training Load $\to$ Readiness** | $zLoad^{\text{within}}_{it-1}$ | $-0.073$ | $0.137$ | $[-0.169, +0.023]$ | **Null / Non-Significant Trend**: Prior-day load shows a negative trend but did not reach significance in Model 1. |
 
 ### Missing-Data Handling & Sample Size Variations Across Models

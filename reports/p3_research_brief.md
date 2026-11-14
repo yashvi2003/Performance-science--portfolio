@@ -17,8 +17,8 @@ This research brief investigates **5 months of continuous free-living longitudin
 ====================================================================================================
 KEY RESEARCH TAKEAWAYS (PMData Cohort, 16 Athletes, ~2,400 Days)
 ----------------------------------------------------------------------------------------------------
-1. Acute Sleep Boosts Morning Readiness: +1 SD in prior-night sleep duration (+1.34 h) 
-   significantly improves next-day morning readiness (+0.22 points, p < 0.001, 95% CI: [0.14, 0.30]).
+1. Acute Sleep Associated with Morning Readiness: +1 SD in prior-night sleep duration (+1.34 h) 
+   is positively associated with next-day morning readiness (+0.22 points, p < 0.001, 95% CI: [0.14, 0.30]).
 2. Significant Sleep Sensitivity Heterogeneity: Likelihood Ratio Testing (χ²(2) = 32.02, p < 0.001) 
    revealed meaningful inter-individual variance in sleep loss sensitivity (random slopes SD = 0.35).
 3. Training Load Triggers Localized Soreness: Acute prior-day training strain (sRPE) strongly 
@@ -68,7 +68,7 @@ $$Y_{it} = (\beta_0 + u_{0i}) + \beta_{\text{within}} zX^{\text{within}}_{it-1} 
 
 ## 4. Empirical Modeling Results & Hypothesis Testing
 
-Following pre-registration in `p3_nmt_profiler/ANALYSIS_PLAN.md`, three primary mixed-effects models were fitted:
+Following the analysis plan in `p3_nmt_profiler/ANALYSIS_PLAN.md`, three primary mixed-effects models were fitted:
 
 ```
 ====================================================================================================
@@ -109,7 +109,7 @@ Group Variance (σ_u0²): 0.054 | Residual Scale (σ_ε²): 0.361 | REML Log-Lik
 * p < 0.05; (ns) non-significant.
 ```
 
-### Pre-Registered Hypotheses & Transparent Null Findings
+### Hypotheses & Transparent Null Findings
 
 1. **$H_{1a}$ Supported (Sleep Duration $\to$ Readiness)**: Acute sleep extension significantly improves morning readiness ($\beta = +0.218, p < 0.001$).
 2. **$H_{1c}$ Supported (Sleep Quality Score $\to$ Fatigue)**: Higher Fitbit sleep scores strongly predict waking with greater energy ($\beta = +0.143, p < 0.001$).
@@ -173,7 +173,9 @@ Evaluating random slopes ($u_{1i} zSleep^{\text{within}}_{it-1}$) for acute slee
 
 ---
 
-## 7. Limb Asymmetry Module (`p3_nmt_profiler/asymmetry.py`)
+## 7. Limb Asymmetry Module [synthetic data] (`p3_nmt_profiler/asymmetry.py`)
+
+*Data source note: Evaluated on synthetic bilateral trials (`shared/synth.py`). PMData does not record dual-plate bilateral kinetics.*
 
 * **Bilateral Asymmetry Index**: $\text{BAI} = \frac{\text{Left} - \text{Right}}{\text{Left} + \text{Right}} \times 100\%$ ($+$ Left-dominant, $-$ Right-dominant).
 * **Persistence Criteria**: Directional asymmetry is flagged as *persistent* if $\ge 75\%$ of consecutive trials favor the same limb.
