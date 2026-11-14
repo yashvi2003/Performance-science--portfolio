@@ -173,7 +173,9 @@ Evaluating random slopes ($u_{1i} zSleep^{\text{within}}_{it-1}$) for acute slee
 
 ---
 
-## 7. Limb Asymmetry Module (`p3_nmt_profiler/asymmetry.py`)
+## 7. Limb Asymmetry Module [synthetic data] (`p3_nmt_profiler/asymmetry.py`)
+
+*Data source note: Evaluated on synthetic bilateral trials (`shared/synth.py`). PMData does not record dual-plate bilateral kinetics.*
 
 * **Bilateral Asymmetry Index**: $\text{BAI} = \frac{\text{Left} - \text{Right}}{\text{Left} + \text{Right}} \times 100\%$ ($+$ Left-dominant, $-$ Right-dominant).
 * **Persistence Criteria**: Directional asymmetry is flagged as *persistent* if $\ge 75\%$ of consecutive trials favor the same limb.
