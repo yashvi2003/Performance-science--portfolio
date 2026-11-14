@@ -68,7 +68,7 @@ $$Y_{it} = (\beta_0 + u_{0i}) + \beta_{\text{within}} zX^{\text{within}}_{it-1} 
 
 ## 4. Empirical Modeling Results & Hypothesis Testing
 
-Following pre-registration in `p3_nmt_profiler/ANALYSIS_PLAN.md`, three primary mixed-effects models were fitted:
+Following the analysis plan in `p3_nmt_profiler/ANALYSIS_PLAN.md`, three primary mixed-effects models were fitted:
 
 ```
 ====================================================================================================
@@ -109,7 +109,7 @@ Group Variance (σ_u0²): 0.054 | Residual Scale (σ_ε²): 0.361 | REML Log-Lik
 * p < 0.05; (ns) non-significant.
 ```
 
-### Pre-Registered Hypotheses & Transparent Null Findings
+### Hypotheses & Transparent Null Findings
 
 1. **$H_{1a}$ Supported (Sleep Duration $\to$ Readiness)**: Acute sleep extension significantly improves morning readiness ($\beta = +0.218, p < 0.001$).
 2. **$H_{1c}$ Supported (Sleep Quality Score $\to$ Fatigue)**: Higher Fitbit sleep scores strongly predict waking with greater energy ($\beta = +0.143, p < 0.001$).

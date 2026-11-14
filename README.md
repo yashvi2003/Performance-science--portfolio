@@ -48,7 +48,7 @@ portfolio/
 ---
 
 ### Project 3: Wearable Recovery & Mixed-Effects Profiler (`p3_nmt_profiler`)
-*Pre-registered longitudinal investigation of wearable sleep duration, nocturnal resting heart rate (RHR), and training strain predicting next-day readiness and fatigue.*
+*Longitudinal investigation of wearable sleep duration, nocturnal resting heart rate (RHR), and training strain predicting next-day readiness and fatigue, with hypotheses and model specifications documented in [`ANALYSIS_PLAN.md`](p3_nmt_profiler/ANALYSIS_PLAN.md) before modelling.*
 
 * **Dataset**: PMData open wearable benchmark ([Thambawita et al., 2020](https://doi.org/10.1145/3339825.3394926)), spanning 16 adults tracked continuously over 5 months (~2,400 participant-days).
 * **Within-Person Centering (Currie / Hoffmann Method)**: Isolates acute day-to-day fluctuations ($X_{it} - \bar{X}_i$) from chronic between-athlete traits ($\bar{X}_i$), eliminating ecological fallacy and cross-sectional confounding.

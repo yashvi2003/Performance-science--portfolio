@@ -7,7 +7,7 @@ To what extent do acute day-to-day fluctuations in prior-night sleep duration, n
 
 ## Analysis Plan & Methodology
 
-1. **Pre-Registration**: Documented in [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) prior to statistical modeling.
+1. **Analysis Plan**: Hypotheses and model specifications documented in [`ANALYSIS_PLAN.md`](ANALYSIS_PLAN.md) before modelling.
 2. **Dataset**: PMData (Thambawita et al., 2020, ACM MMSys '20; DOI: [10.1145/3339825.3394926](https://doi.org/10.1145/3339825.3394926)). 16 physically active adults tracked continuously for 5 months (~2,400 participant-days).
 3. **Currie / Hoffmann Person-Mean Centering Decomposition**:
    - Between-person trait means ($\bar{X}_i$)
