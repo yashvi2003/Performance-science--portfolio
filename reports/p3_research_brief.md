@@ -17,8 +17,8 @@ This research brief investigates **5 months of continuous free-living longitudin
 ====================================================================================================
 KEY RESEARCH TAKEAWAYS (PMData Cohort, 16 Athletes, ~2,400 Days)
 ----------------------------------------------------------------------------------------------------
-1. Acute Sleep Boosts Morning Readiness: +1 SD in prior-night sleep duration (+1.34 h) 
-   significantly improves next-day morning readiness (+0.22 points, p < 0.001, 95% CI: [0.14, 0.30]).
+1. Acute Sleep Associated with Morning Readiness: +1 SD in prior-night sleep duration (+1.34 h) 
+   is positively associated with next-day morning readiness (+0.22 points, p < 0.001, 95% CI: [0.14, 0.30]).
 2. Significant Sleep Sensitivity Heterogeneity: Likelihood Ratio Testing (χ²(2) = 32.02, p < 0.001) 
    revealed meaningful inter-individual variance in sleep loss sensitivity (random slopes SD = 0.35).
 3. Training Load Triggers Localized Soreness: Acute prior-day training strain (sRPE) strongly 
