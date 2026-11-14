@@ -4,7 +4,7 @@
 This pipeline provides automated biomechanical phase detection and metrics computation for vertical jump force-time data, conforming strictly to the consensus standards established by **McMahon et al. (2018)**.
 
 ### Research Question
-How accurately and reliably can discrete biomechanical events (movement onset, unweighting trough, upward BW crossing, zero-velocity transition, concentric propulsion peak, takeoff, landing impact) and performance metrics (impulse-momentum jump height, flight-time jump height, reactive strength index modified [RSImod], peak mechanical power) be recovered across varying sampling rates ($250\text{--}2000\text{ Hz}$), noise regimes ($0\text{--}20\text{ N}$), baseline quiet-standing durations ($0.30\text{--}0.75\text{ s}$), sensor flight offsets, and complex force-curve morphologies?
+How accurately and reliably can discrete biomechanical events (movement onset, unweighting trough, upward BW crossing, zero-velocity transition, concentric propulsion peak, takeoff, landing impact) and performance metrics (impulse-momentum jump height, flight-time jump height, reactive strength index modified [RSImod], peak mechanical power) be recovered across varying sampling rates ($250\text{--}2000\text{ Hz}$), noise levels ($0\text{--}12\text{ N}$ baseline noise, flight noise up to $4\text{ N}$, flight offsets up to $25\text{ N}$), baseline quiet-standing durations ($0.30\text{--}0.75\text{ s}$), and complex force-curve morphologies?
 
 ---
 
