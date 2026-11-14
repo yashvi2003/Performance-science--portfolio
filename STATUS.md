@@ -11,7 +11,7 @@ Run `python scripts/progress.py` for the summary.
 - [x] DATA_SOURCES.md: inventory of every dataset (source, licence/consent, n, device, sampling rate, format); the user's 10-athlete CMJ set described and de-identified
 
 ## Project 1 - Automatic jump analysis engine, VALD-style (p1_nmt_pipeline)
-Drop in a force-plate file -> it works out which jump it is -> key metrics + graph, automatically.
+Automated CMJ force-time curve partitioning, event detection, and performance metrics computation with visual reporting. (Note: Jump-type classification deferred to future work).
 - [x] M1a Config (YAML) + input validation + filters (zero-phase Butterworth)
 - [x] M1b shared/synth.py: force-time trial generators (CMJ, SJ, DJ, IMTP) with known jump height/event times, per-limb split, session-level table generator, wearable-style daily generator
 - [x] M2a CMJ phase detection (onset, unweighting, braking, propulsion, take-off, landing)
@@ -92,7 +92,7 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
   - R Supplementary Script (`lme4`): Authored `p3_nmt_profiler/r_crosscheck.R` and exported `data/processed/p3_model1_dataset.csv` for standalone cross-platform verification by external evaluators. Verified that Rscript is not installed on this local system and avoided asserting synthetic execution outputs.
   - Milestone M4 (`p3_nmt_profiler/asymmetry.py`): Implemented Bilateral Asymmetry Index (BAI), Limb Symmetry Index (LSI), multi-session persistence tracker, and fatigue-sensitivity longitudinal slope estimator. Added unit tests in `tests/test_p3_asymmetry.py` (all passing).
   - Milestone M5b (`reports/p3_research_brief.md` & `p3_nmt_profiler/README.md`): Authored comprehensive 2-page research brief with question, methods, data provenance, empirical results, transparent null findings ($H_2, H_{3b}$), and research limitations.
-  - Test Suite: 86 unit tests passing repository-wide. Project 3 is 100% complete (7/7 milestones). Next: Project 2 (`p2_nmt_reports`).
+  - Test Suite: 86 unit tests passing repository-wide. Project 3 core milestones completed (7/7 milestones). Next: Project 2 (`p2_nmt_reports`).
 
   - Milestone M2c remains unstarted as instructed. Next: await explicit instruction before proceeding to M2c.
 - 2026-09-22: Completed and finalized Project 1 Milestone M2g (Open Data Validation & Reliability on White et al., Zenodo DOI: 10.5281/zenodo.19136480, PLOS ONE DOI: 10.1371/journal.pone.0263846).
@@ -113,7 +113,7 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
   - M6a CLI Entry Point: Implemented `p1_nmt_pipeline/cli.py`. Supports single-trial CSV or directory ingestion, automated timestamp resampling and phase analysis, metric registry mapping, strict contract validation via `shared.contract.validate_sessions_df(strict=True)`, and export to `data/processed/sessions.csv`. Automated de-identification mapping (`ATH_01`, `ATH_02`, etc.) prevents leakage of unapproved private IDs.
   - M6b Documentation Polish: Updated `p1_nmt_pipeline/README.md` with complete single-trial report documentation, CLI usage examples, reproducibility instructions, synthetic data disclaimer, AI-use transparency disclosure, and limitations section.
   - Test Suite: Added 3 unit tests for CLI directory execution, CLI single-file processing, and report figure generation in `tests/test_p1_pipeline.py`. Full test suite passes: 73 tests total (72 fast tests passing in ~20s, 1 slow Monte Carlo test).
-  - Scope Agreement: M3 (jump-type classifier), M4a (SJ), M4b (DJ), and M5b (Streamlit) explicitly deferred to future work per user instruction. Project 1 is fully complete.
+  - Scope Agreement: Project 1 core milestones completed (M1a, M1b, M2a, M2b, M2c, M2d, M2e, M2f, M2g, M5a, M6a, M6b); jump-type classifier (M3), squat jump (M4a), drop jump (M4b), and Streamlit UI (M5b) deferred to future work.
 - 2026-09-22: Transitioned to Project 3 (`p3_nmt_profiler`), Milestones M1a & M1b:
   - Provenance Check: Audited PMData publication (Thambawita et al., 2020, MMSys '20, DOI: 10.1145/3339825.3394926). Verified license in official OSF repository `license.txt` is Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0; portal lists CC BY 4.0). Confirmed study protocol evaluated and approved by NSD / Sikt; participants provided written informed consent. Updated `DATA_SOURCES.md` row D2.
   - Data Ingestion & Download: Authored `scripts/fetch_pmdata_summaries.py` fetching lightweight daily summary CSVs (~300 KB total across all 16 participants: `wellness.csv`, `srpe.csv`, `sleep_score.csv`, `time_in_heart_rate_zones.json`) from OSF repository (`osf.io/vx4bk`).
@@ -147,7 +147,7 @@ Drop in a force-plate file -> it works out which jump it is -> key metrics + gra
   - M2b Daily Wearable Telemetry Join (`p2_nmt_reports/wearable.py`): Joined daily wearable telemetry onto `wearable_daily.csv` contract fields (`recovery_pct`, `hrv_ms`, `rhr_bpm`, `day_strain`, `sleep_hours`), tagged autonomic recovery zones (Red $<34\%$, Yellow $34\text{--}66\%$, Green $\ge 67\%$), and flagged compound neuromuscular-autonomic deficits.
   - M2d Within-Athlete Change Model (`p2_nmt_reports/stats.py`): Implemented linear mixed-effects model ($\text{MixedLM}$ in `statsmodels`) with random intercepts per athlete, extracting fixed effects with $95\%$ Wald CIs, variance components, and derived individual $\text{MDC}_{95}$ thresholds. Explicitly labeled a demonstration of method on synthetic data.
   - M3 Visualizations (`p2_nmt_reports/charts.py`): Generated publication-ready figures `reports/figures/p2_longitudinal_baseline_ribbon.png` and `reports/figures/p2_longitudinal_readiness_overlay.png` (both carrying explicit `[Synthetic Data]` markers).
-  - M5 Tests & README (`p2_nmt_reports/README.md`): Full test suite passing repository-wide with 100 tests (99 fast tests in ~31s, 1 slow Monte Carlo test). Project 2 is fully complete.
+  - M5 Tests & README (`p2_nmt_reports/README.md`): Full test suite passing repository-wide with 100 tests (99 fast tests in ~31s, 1 slow Monte Carlo test). Project 2 core milestones completed (M1a, M1b, M2a, M2b, M2d, M3, M5); multi-tier alert logic (M2c), Streamlit dashboard (M4a), and HTML/PDF export (M4b) deferred to future work.
 
 
 
